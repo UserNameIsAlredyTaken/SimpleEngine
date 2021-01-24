@@ -9,7 +9,6 @@ class Game
 public:
 	int Run();
 
-	//BaseWindow<>* CreateNewWindow();
 
 };
 

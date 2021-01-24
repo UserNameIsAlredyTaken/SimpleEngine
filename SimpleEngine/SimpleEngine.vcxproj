@@ -142,12 +142,14 @@
     <ClCompile Include="CircleWindow.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TestRedCircleWindow.cpp" />
     <ClCompile Include="WindowClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="CircleWindow.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="TestRedCircleWindow.h" />
     <ClInclude Include="WindowClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
