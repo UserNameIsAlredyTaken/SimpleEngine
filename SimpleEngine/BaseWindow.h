@@ -1,44 +1,22 @@
 #pragma once
 #include <windows.h>
+#include "WindowClass.h"
 
-template <class DERIVED_TYPE>
+
 class BaseWindow
 {
 public:
-    /*Each DERIVED_TYPE must implement:
-    PCWSTR  ClassName() const;
-    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-    */
+    HWND m_hwnd;
 
-    static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-    {
-        DERIVED_TYPE* pThis = NULL;
-
-        if (uMsg == WM_NCCREATE)
-        {
-            CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
-            pThis = (DERIVED_TYPE*)pCreate->lpCreateParams;
-            SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pThis);
-
-            pThis->m_hwnd = hwnd;
-        }
-        else
-        {
-            pThis = (DERIVED_TYPE*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-        }
-        if (pThis)
-        {
-            return pThis->HandleMessage(uMsg, wParam, lParam);
-        }
-        else
-        {
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
-        }
+    
+    LRESULT HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
+    { 
+        return handlerFunction(this, hwnd, uMsg, wParam, lParam);
     }
 
-    BaseWindow() : m_hwnd(NULL) { }
+    BaseWindow(LRESULT (*handlerFunction)(BaseWindow* concreteWindow, HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)) : m_hwnd(NULL), handlerFunction(handlerFunction){ }
 
-        BOOL Create(
+    BOOL Create(
         PCWSTR lpWindowName,
         DWORD dwStyle,
         DWORD dwExStyle = 0,
@@ -50,25 +28,17 @@ public:
         HMENU hMenu = 0
     )
     {
-        WNDCLASS wc = { 0 };
-
-        wc.lpfnWndProc = DERIVED_TYPE::WindowProc;
-        wc.hInstance = GetModuleHandle(NULL);
-        wc.lpszClassName = ((DERIVED_TYPE*)this)->ClassName();
-
-        RegisterClass(&wc);
-
         m_hwnd = CreateWindowEx(
-            dwExStyle, ((DERIVED_TYPE*)this)->ClassName(), lpWindowName, dwStyle, x, y,
+            dwExStyle, WindowClass::getInstance().GetName(), lpWindowName, dwStyle, x, y,
             nWidth, nHeight, hWndParent, hMenu, GetModuleHandle(NULL), this
         );
 
         return (m_hwnd ? TRUE : FALSE);
     }
 
-    HWND Window() const { return m_hwnd; }
+    HWND GetHwnd() const { return m_hwnd; }
+ 
 
-protected:    
-
-    HWND m_hwnd;
+private:
+    LRESULT (*handlerFunction)(BaseWindow* concreteWindow, HWND, UINT, WPARAM, LPARAM); //ponter to a function that handles messages for a window
 };

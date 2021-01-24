@@ -1,6 +1,7 @@
 #include "CircleWindow.h"
 
 
+
 template <class T> void SafeRelease(T** ppT)
 {
     if (*ppT)
@@ -94,7 +95,12 @@ void CircleWindow::Resize()
     }
 }
 
-LRESULT CircleWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CircleWindow::HandleMessage(BaseWindow* concreteWindow, HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    return ((CircleWindow*)concreteWindow)->CircleHandleMessage(hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT CircleWindow::CircleHandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -116,11 +122,9 @@ LRESULT CircleWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         OnPaint();
         return 0;
 
-
-
     case WM_SIZE:
         Resize();
         return 0;
     }
-    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
