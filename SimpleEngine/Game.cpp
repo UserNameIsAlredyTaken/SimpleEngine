@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "CircleWindow.h"
 #include "TestRedCircleWindow.h"
-#include "WindowClass.h"
+#include "WindowStyle.h"
 
 
 void CreateWindows()

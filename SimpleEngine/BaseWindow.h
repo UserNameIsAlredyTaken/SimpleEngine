@@ -1,6 +1,6 @@
 #pragma once
 #include <windows.h>
-#include "WindowClass.h"
+#include "WindowStyle.h"
 
 
 class BaseWindow
@@ -29,7 +29,7 @@ public:
     )
     {
         m_hwnd = CreateWindowEx(
-            dwExStyle, WindowClass::getInstance().GetName(), lpWindowName, dwStyle, x, y,
+            dwExStyle, WindowStyle::getInstance().GetName(), lpWindowName, dwStyle, x, y,
             nWidth, nHeight, hWndParent, hMenu, GetModuleHandle(NULL), this
         );
 

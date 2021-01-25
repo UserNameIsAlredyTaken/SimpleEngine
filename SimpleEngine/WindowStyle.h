@@ -4,22 +4,22 @@
 /// <summary>
 /// Global window class for all windows of the app
 /// </summary>
-class WindowClass
+class WindowStyle
 {
 	//Singletone (probably thread safe)
 public:
-	static WindowClass& getInstance() {
-		static WindowClass instance;
+	static WindowStyle& getInstance() {
+		static WindowStyle instance;
 		return instance;
 	}
 
 	PCWSTR GetName();
 
 private:
-	WindowClass();
-	~WindowClass() = default;
-	WindowClass(const WindowClass&) = delete;
-	WindowClass& operator=(const WindowClass&) = delete;
+	WindowStyle();
+	~WindowStyle() = default;
+	WindowStyle(const WindowStyle&) = delete;
+	WindowStyle& operator=(const WindowStyle&) = delete;
 
 	WNDCLASS windowClass;
 

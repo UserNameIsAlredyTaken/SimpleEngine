@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WindowClass.h"
+#include "WindowStyle.h"
 #include "BaseWindow.h"
 
 
@@ -31,7 +31,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 }
 
 
-WindowClass::WindowClass()
+WindowStyle::WindowStyle()
 {
     windowClass = { 0 };
 
@@ -42,7 +42,7 @@ WindowClass::WindowClass()
     RegisterClass(&windowClass);
 }
 
-PCWSTR WindowClass::GetName()
+PCWSTR WindowStyle::GetName()
 {
     return windowClass.lpszClassName;
 }
