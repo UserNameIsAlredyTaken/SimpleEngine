@@ -2,37 +2,38 @@
 #include "CircleWindow.h"
 #include "TestRedCircleWindow.h"
 #include "WindowStyle.h"
+#include <memory>
 
 
-void CreateWindows()
+void Game::CreateWindows()
 {
-    TestRedCircleWindow redCircle;
-    if (!redCircle.Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
-        return;
-    ShowWindow(redCircle.GetHwnd(), SW_SHOWDEFAULT);
+    std::shared_ptr<BaseWindow> newWindow = std::make_shared<TestRedCircleWindow>();
 
+    if (newWindow->Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
+    {
+        windows.insert(newWindow);
+    }
 
-    CircleWindow circle;
-    if (!circle.Create(L"Circle", WS_OVERLAPPEDWINDOW))
-        return;
-    ShowWindow(circle.GetHwnd(), SW_SHOWDEFAULT);
+    newWindow = std::make_shared<CircleWindow>();
+
+    if (newWindow->Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
+    {
+        windows.insert(newWindow);
+    }
+}
+
+void Game::ShowWindows()
+{
+    for (auto&& window : windows) 
+    {
+        ShowWindow(window->GetHwnd(), SW_SHOWDEFAULT);
+    }
 }
 
 int Game::Run()
 {    
-    //CreateWindows();
-
-    TestRedCircleWindow redCircle;
-    if (!redCircle.Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
-        return 0;
-    ShowWindow(redCircle.GetHwnd(), SW_SHOWDEFAULT);
-
-    CircleWindow circle;
-    if (!circle.Create(L"Circle", WS_OVERLAPPEDWINDOW))
-        return 0;
-    ShowWindow(circle.GetHwnd(), SW_SHOWDEFAULT);
-
-
+    CreateWindows();
+    ShowWindows();
 
 
     MSG msg = { };

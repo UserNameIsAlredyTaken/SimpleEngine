@@ -2,15 +2,6 @@
 
 
 
-template <class T> void SafeRelease(T** ppT)
-{
-    if (*ppT)
-    {
-        (*ppT)->Release();
-        *ppT = NULL;
-    }
-}
-
 void CircleWindow::CalculateLayout()
 {
     if (pRenderTarget != NULL)
@@ -54,8 +45,8 @@ HRESULT CircleWindow::CreateGraphicsResources()
 
 void CircleWindow::DiscardGraphicsResources()
 {
-    SafeRelease(&pRenderTarget);
-    SafeRelease(&pBrush);
+    pRenderTarget.Reset();
+    pBrush.Reset();
 }
 
 void CircleWindow::OnPaint()
@@ -69,7 +60,7 @@ void CircleWindow::OnPaint()
         pRenderTarget->BeginDraw();
 
         pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
-        pRenderTarget->FillEllipse(ellipse, pBrush);
+        pRenderTarget.Get()->FillEllipse(ellipse, pBrush.Get());
 
         hr = pRenderTarget->EndDraw();
         if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
@@ -106,7 +97,7 @@ LRESULT CircleWindow::CircleHandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, L
     {
     case WM_CREATE:
         if (FAILED(D2D1CreateFactory(
-            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, pFactory.GetAddressOf())))
         {
             return -1;  // Fail CreateWindowEx.
         }
@@ -114,7 +105,7 @@ LRESULT CircleWindow::CircleHandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, L
 
     case WM_DESTROY:
         DiscardGraphicsResources();
-        SafeRelease(&pFactory);
+        pFactory.Reset();
         PostQuitMessage(0);
         return 0;
 
