@@ -87,8 +87,9 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,15 +143,22 @@
   <ItemGroup>
     <ClCompile Include="CircleWindow.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RedrawGame.cpp" />
     <ClCompile Include="TestRedCircleWindow.cpp" />
+    <ClCompile Include="Util.cpp" />
     <ClCompile Include="WindowStyle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="CircleWindow.h" />
+    <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="RedrawGame.h" />
     <ClInclude Include="TestRedCircleWindow.h" />
+    <ClInclude Include="Util.h" />
     <ClInclude Include="WindowStyle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -35,11 +35,22 @@ WindowStyle::WindowStyle()
 {
     windowClass = { 0 };
 
+    windowClass.style = CS_HREDRAW | CS_VREDRAW;
     windowClass.lpfnWndProc = WindowProc;
+    windowClass.cbClsExtra = 0;
+    windowClass.cbWndExtra = 0;
     windowClass.hInstance = GetModuleHandle(NULL);
+    windowClass.hIcon = LoadIcon(0, IDI_APPLICATION);
+    windowClass.hCursor = LoadCursor(0, IDC_ARROW);
+    windowClass.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
+    windowClass.lpszMenuName = 0;
     windowClass.lpszClassName = L"CommonWindowClass";
 
-    RegisterClass(&windowClass);
+    if (!RegisterClass(&windowClass))
+    {
+        MessageBox(0, L"RegisterClass Failed.", 0, 0);
+        return;
+    }
 }
 
 PCWSTR WindowStyle::GetName()

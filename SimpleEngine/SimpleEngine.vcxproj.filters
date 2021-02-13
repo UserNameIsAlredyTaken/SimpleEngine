@@ -30,6 +30,15 @@
     <ClCompile Include="WindowStyle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RedrawGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -45,6 +54,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WindowStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RedrawGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
