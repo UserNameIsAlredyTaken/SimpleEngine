@@ -29,7 +29,7 @@
 	{\
 		((GameClass*)concreteGame)->Update(gt);\
 	}\
-	static void RedrawGame::StaticDraw(Game* concreteGame, const GameTimer& gt)\
+	static void GameClass::StaticDraw(Game* concreteGame, const GameTimer& gt)\
 	{\
 		((GameClass*)concreteGame)->Draw(gt);\
 	}

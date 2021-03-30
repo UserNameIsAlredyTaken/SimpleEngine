@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoxGame.cpp" />
     <ClCompile Include="CircleWindow.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameTimer.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseWindow.h" />
+    <ClInclude Include="BoxGame.h" />
     <ClInclude Include="CircleWindow.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Game.h" />
