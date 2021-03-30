@@ -7,29 +7,17 @@
 #include "RedrawGame.h"
 #include <windows.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 
 int main()
 {
-    /*Game game;
-    game.Run();*/
-        
-
-    try
-    {
-        RedrawGame game(GetModuleHandle(NULL));
-
-        if (!game.Initialize())
-            return 0;
-
-        return game.Run();
-    }
-    catch (DxException& e)
-    {
-        MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+    RedrawGame game(GetModuleHandle(NULL));
+    if (!game.Initialize())
         return 0;
-    }
-
-    return 0;
+    
+    return game.Run();
 }
 

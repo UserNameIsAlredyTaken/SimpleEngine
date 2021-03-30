@@ -108,11 +108,15 @@ protected:
 	void LogAdapterOutputs(IDXGIAdapter* adapter);
 	void LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);
 
-	void InitUpdateFunction(std::function<void(Game* concreteGame, const GameTimer& gt)> update) {
-		updates.push_back(update);
+	//constexpr void InitUpdateFunction(std::function<void(Game* concreteGame, const GameTimer& gt)> update) {
+	constexpr void InitUpdateFunction(void(*update)(Game* concreteGame, const GameTimer& gt) ) {
+		//updates.push_back(update);
+		updates[0] = update;
 	}
-	void InitDrawFunction(std::function<void(Game* concreteGame, const GameTimer& gt)> render) {
-		renders.push_back(render);
+	//void InitDrawFunction(std::function<void(Game* concreteGame, const GameTimer& gt)> render) {
+	constexpr void InitDrawFunction(void(*render)(Game* concreteGame, const GameTimer& gt)) {
+		//renders.push_back(render);
+		renders[0] = render;
 	}
 
 private:
@@ -124,8 +128,10 @@ private:
 
 	void Update(const GameTimer& gt);
 	void Draw(const GameTimer& gt);
-	std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> updates;
-	std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> renders;
+	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> updates;
+	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> renders;
+	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> updates;
+	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> renders;
 
 	
 
