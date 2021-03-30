@@ -16,14 +16,12 @@ public:
 	~RedrawGame();
 
 	bool Initialize();
-
 	
 
 private:
-	static LRESULT StaticMsgProc(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	static void StaticUpdate(Game* concreteGame, const GameTimer& gt);
-	static void StaticDraw(Game* concreteGame, const GameTimer& gt);
 
+	NECESSARY_STATIC_FUNCTIONS(RedrawGame);
+	
 	XMVECTORF32 currentColor;
 
 	XMVECTORF32 selectedColor = Colors::LightSteelBlue;

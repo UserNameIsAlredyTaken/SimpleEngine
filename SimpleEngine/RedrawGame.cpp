@@ -14,31 +14,13 @@ RedrawGame::~RedrawGame()
 
 bool RedrawGame::Initialize()
 {
-	if (!Game::Initialize(StaticMsgProc))
-		return false;
-
+	NECESSARY_STATIC_INIT();
+	
 	currentColor = selectedColor;
-
-	InitUpdateFunction(StaticUpdate);
-	InitDrawFunction(StaticDraw);
 
 	return true;
 }
 
-LRESULT RedrawGame::StaticMsgProc(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	return ((RedrawGame*)concreteGame)->MsgProc(hwnd, msg, wParam, lParam);	
-}
-
-void RedrawGame::StaticUpdate(Game* concreteGame, const GameTimer& gt)
-{
-	((RedrawGame*)concreteGame)->Update(gt);
-}
-
-void RedrawGame::StaticDraw(Game* concreteGame, const GameTimer& gt)
-{
-	((RedrawGame*)concreteGame)->Draw(gt);
-}
 
 LRESULT RedrawGame::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {

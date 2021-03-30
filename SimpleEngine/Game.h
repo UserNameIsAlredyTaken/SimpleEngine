@@ -20,6 +20,27 @@
 #include "d3dx12.h"
 #include <functional>
 
+#define NECESSARY_STATIC_FUNCTIONS(GameClass)\
+	static LRESULT GameClass::StaticMsgProc(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)\
+	{\
+		return ((GameClass*)concreteGame)->MsgProc(hwnd, msg, wParam, lParam);\
+	}\
+	static void GameClass::StaticUpdate(Game* concreteGame, const GameTimer& gt)\
+	{\
+		((GameClass*)concreteGame)->Update(gt);\
+	}\
+	static void RedrawGame::StaticDraw(Game* concreteGame, const GameTimer& gt)\
+	{\
+		((GameClass*)concreteGame)->Draw(gt);\
+	}
+
+
+#define NECESSARY_STATIC_INIT(){\
+	if (!Game::Initialize(StaticMsgProc))\
+	return false;\
+	InitUpdateFunction(StaticUpdate);\
+	InitDrawFunction(StaticDraw);\
+	}
 
 class Game
 {
