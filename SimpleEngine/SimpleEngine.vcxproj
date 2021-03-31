@@ -118,8 +118,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,10 +146,13 @@
   <ItemGroup>
     <ClCompile Include="BoxGame.cpp" />
     <ClCompile Include="CircleWindow.cpp" />
+    <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="RedrawGame.cpp" />
+    <ClCompile Include="Shaders\color.hlsl" />
     <ClCompile Include="TestRedCircleWindow.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="WindowStyle.cpp" />
@@ -157,11 +161,14 @@
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="BoxGame.h" />
     <ClInclude Include="CircleWindow.h" />
+    <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="MathHelper.h" />
     <ClInclude Include="RedrawGame.h" />
     <ClInclude Include="TestRedCircleWindow.h" />
+    <ClInclude Include="UploadBuffer.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="WindowStyle.h" />
   </ItemGroup>
