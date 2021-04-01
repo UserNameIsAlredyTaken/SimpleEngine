@@ -301,7 +301,7 @@ int Game::Run()
             {
                 CalculateFrameStats();
                 Update(mTimer);
-                //Draw(mTimer);
+                Draw(mTimer);
             }
             else
             {
@@ -435,8 +435,8 @@ void Game::OnResize()
    
     mScissorRect = { 0, 0, mClientWidth, mClientHeight };
     
-    mCommandList->RSSetViewports(1, &mScreenViewport);
-    mCommandList->RSSetScissorRects(1, &mScissorRect);
+    // mCommandList->RSSetViewports(1, &mScreenViewport);
+    // mCommandList->RSSetScissorRects(1, &mScissorRect);
 }
 
 bool Game::InitMainWindow()
