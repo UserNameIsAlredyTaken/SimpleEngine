@@ -14,7 +14,16 @@ BoxGame::~BoxGame()
 
 bool BoxGame::Initialize()
 {
-	NECESSARY_STATIC_INIT();
+	// NECESSARY_STATIC_INIT();
+		
+	if (!Game::Initialize(StaticMsgProc))
+		return false;
+	InitUpdateFunction(StaticUpdate);
+	InitDrawFunction(StaticDraw);
+	InitOnMouseDownHandlers(StaticOnMouseDown);
+	InitOnMouseUpHandlers(StaticOnMouseUp);
+	InitOnMouseMoveHandlers(StaticOnMouseMove);
+	InitOnResizeHandlers(StaticOnResize);
 	
 	// Reset the command list to prep for initialization commands.
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
@@ -115,7 +124,7 @@ void BoxGame::OnMouseMove(WPARAM btnState, int x, int y)
 
 void BoxGame::OnResize()
 {
-	Game::OnResize();
+	Game::BaseOnResize();
 
 	// The window resized, so update the aspect ratio and recompute the projection matrix.
 	XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);

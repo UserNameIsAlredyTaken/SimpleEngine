@@ -21,6 +21,8 @@ public:
 private:
 
 	NECESSARY_STATIC_FUNCTIONS(RedrawGame);
+
+	
 	
 	XMVECTORF32 currentColor;
 
@@ -30,5 +32,6 @@ private:
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	void Update(const GameTimer& gt);
 	void Draw(const GameTimer& gt);
+	void OnResize();
 
 };

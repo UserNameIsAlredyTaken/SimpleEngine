@@ -89,3 +89,8 @@ void RedrawGame::Draw(const GameTimer& gt)
 	// so we do not have to wait per frame.
 	FlushCommandQueue();
 }
+
+void RedrawGame::OnResize()
+{
+	Game::BaseOnResize();
+}

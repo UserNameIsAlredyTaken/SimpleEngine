@@ -45,6 +45,10 @@
 	static void GameClass::StaticOnMouseMove(Game* concreteGame, const WPARAM btnState, int x, int y)\
 	{\
 		((GameClass*)concreteGame)->OnMouseMove(btnState, x, y);\
+	}\
+	static void GameClass::StaticOnResize(Game* concreteGame)\
+	{\
+		((GameClass*)concreteGame)->OnResize();\
 	}
 
 
@@ -56,6 +60,7 @@
 	InitOnMouseDownHandlers(StaticOnMouseDown);\
 	InitOnMouseUpHandlers(StaticOnMouseUp);\
 	InitOnMouseMoveHandlers(StaticOnMouseMove);\
+	InitOnResizeHandlers(StaticOnResize);\
 	}
 
 class Game
@@ -121,7 +126,7 @@ protected:
 	int mClientHeight = 600;
 
 	void CreateRtvAndDsvDescriptorHeaps();
-	void OnResize();
+	void BaseOnResize();
 	
 	// Convenience overrides for handling mouse input.
 	void OnMouseDown(WPARAM btnState, int x, int y);
@@ -164,6 +169,9 @@ protected:
 	constexpr void InitOnMouseMoveHandlers(void(*handler)(Game* concreteGame, const WPARAM btnState, int x, int y)) {
 		onMouseMoveHandlers[0] = handler;
 	}
+	constexpr void InitOnResizeHandlers(void(*handler)(Game* concreteGame)) {
+		onResizeHandlers[0] = handler;
+	}
 	
 
 private:
@@ -175,6 +183,7 @@ private:
 
 	void Update(const GameTimer& gt);
 	void Draw(const GameTimer& gt);
+	void OnResize();
 	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> updates;
 	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> renders;
 	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> updates;
@@ -182,6 +191,7 @@ private:
 	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseDownHandlers;
 	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseUpHandlers;
 	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseMoveHandlers;
+	std::array<void(*)(Game* concreteGame),1> onResizeHandlers;
 
 	
 

@@ -27,7 +27,7 @@ ComPtr<ID3DBlob> d3dUtil::LoadBinary(const std::wstring& filename)
     fin.seekg(0, std::ios_base::beg);
 
     ComPtr<ID3DBlob> blob;
-    D3DCreateBlob(size, blob.GetAddressOf());
+    ThrowIfFailed(D3DCreateBlob(size, blob.GetAddressOf()));
 
     fin.read((char*)blob->GetBufferPointer(), size);
     fin.close();
@@ -45,23 +45,23 @@ Microsoft::WRL::ComPtr<ID3D12Resource> d3dUtil::CreateDefaultBuffer(
     ComPtr<ID3D12Resource> defaultBuffer;
 
     // Create the actual default buffer resource.
-    device->CreateCommittedResource(
+    ThrowIfFailed(device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
 		D3D12_RESOURCE_STATE_COMMON,
         nullptr,
-        IID_PPV_ARGS(defaultBuffer.GetAddressOf()));
+        IID_PPV_ARGS(defaultBuffer.GetAddressOf())));
 
     // In order to copy CPU memory data into our default buffer, we need to create
     // an intermediate upload heap. 
-    device->CreateCommittedResource(
+    ThrowIfFailed(device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(byteSize),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
-        IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
+        IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
 
 
     // Describe the data we want to copy into the default buffer.
@@ -109,7 +109,7 @@ ComPtr<ID3DBlob> d3dUtil::CompileShader(
 		OutputDebugStringA((char*)errors->GetBufferPointer());
 
 	ThrowIfFailed(hr);
-	
+
 	return byteCode;
 }
 

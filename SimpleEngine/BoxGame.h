@@ -32,6 +32,34 @@ private:
     XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
 	NECESSARY_STATIC_FUNCTIONS(BoxGame);
+	// static LRESULT BoxGame::StaticMsgProc(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	// {
+	// 	return ((BoxGame*)concreteGame)->MsgProc(hwnd, msg, wParam, lParam);
+	// }
+	// static void BoxGame::StaticUpdate(Game* concreteGame, const GameTimer& gt)
+	// {
+	// 	((BoxGame*)concreteGame)->Update(gt);
+	// }
+	// static void BoxGame::StaticDraw(Game* concreteGame, const GameTimer& gt)
+	// {
+	// 	((BoxGame*)concreteGame)->Draw(gt);
+	// }
+	// static void BoxGame::StaticOnMouseDown(Game* concreteGame, const WPARAM btnState, int x, int y)
+	// {
+	// 	((BoxGame*)concreteGame)->OnMouseDown(btnState, x, y);
+	// }
+	// static void BoxGame::StaticOnMouseUp(Game* concreteGame, const WPARAM btnState, int x, int y)
+	// {
+	// 	((BoxGame*)concreteGame)->OnMouseUp(btnState, x, y);
+	// }
+	// static void BoxGame::StaticOnMouseMove(Game* concreteGame, const WPARAM btnState, int x, int y)
+	// {
+	// 	((BoxGame*)concreteGame)->OnMouseMove(btnState, x, y);
+	// }
+	// static void BoxGame::StaticOnResize(Game* concreteGame)
+	// {
+	// 	((BoxGame*)concreteGame)->OnResize();
+	// }
 
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	void Update(const GameTimer& gt);
