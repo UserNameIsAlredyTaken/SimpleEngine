@@ -16,13 +16,11 @@ public:
 	~RedrawGame();
 
 	bool Initialize();
+
 	
-
-private:
-
 	NECESSARY_STATIC_FUNCTIONS(RedrawGame);
 
-	
+private:	
 	
 	XMVECTORF32 currentColor;
 

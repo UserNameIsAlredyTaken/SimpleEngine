@@ -1,7 +1,5 @@
 #include "BoxGame.h"
 
-
-
 BoxGame::BoxGame(HINSTANCE hInstance)
 	: Game(hInstance)
 {
@@ -16,14 +14,8 @@ bool BoxGame::Initialize()
 {
 	// NECESSARY_STATIC_INIT();
 		
-	if (!Game::Initialize(StaticMsgProc))
+	if (!Game::Initialize<BoxGame>())
 		return false;
-	InitUpdateFunction(StaticUpdate);
-	InitDrawFunction(StaticDraw);
-	InitOnMouseDownHandlers(StaticOnMouseDown);
-	InitOnMouseUpHandlers(StaticOnMouseUp);
-	InitOnMouseMoveHandlers(StaticOnMouseMove);
-	InitOnResizeHandlers(StaticOnResize);
 	
 	// Reset the command list to prep for initialization commands.
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));

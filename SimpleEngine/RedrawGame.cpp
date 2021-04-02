@@ -14,7 +14,9 @@ RedrawGame::~RedrawGame()
 
 bool RedrawGame::Initialize()
 {
-	NECESSARY_STATIC_INIT();
+	// NECESSARY_STATIC_INIT();
+	if (!Game::Initialize<RedrawGame>())
+		return false;
 	
 	currentColor = selectedColor;
 

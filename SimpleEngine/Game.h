@@ -15,7 +15,6 @@
 #include "BaseWindow.h"
 #include "set"
 #include "GameTimer.h"
-// #include "Util.h"
 #include "d3dUtil.h"
 #include "d3d12.h"
 #include "d3dx12.h"
@@ -52,16 +51,16 @@
 	}
 
 
-#define NECESSARY_STATIC_INIT(){\
-	if (!Game::Initialize(StaticMsgProc))\
-	return false;\
-	InitUpdateFunction(StaticUpdate);\
-	InitDrawFunction(StaticDraw);\
-	InitOnMouseDownHandlers(StaticOnMouseDown);\
-	InitOnMouseUpHandlers(StaticOnMouseUp);\
-	InitOnMouseMoveHandlers(StaticOnMouseMove);\
-	InitOnResizeHandlers(StaticOnResize);\
-	}
+// #define NECESSARY_STATIC_INIT(){\
+// 	if (!Game::Initialize(StaticMsgProc))\
+// 		return false;\
+// 	InitUpdateFunction(StaticUpdate);\
+// 	InitDrawFunction(StaticDraw);\
+// 	InitOnMouseDownHandlers(StaticOnMouseDown);\
+// 	InitOnMouseUpHandlers(StaticOnMouseUp);\
+// 	InitOnMouseMoveHandlers(StaticOnMouseMove);\
+// 	InitOnResizeHandlers(StaticOnResize);\
+// 	}
 
 class Game
 {
@@ -73,7 +72,6 @@ protected:
 	Game(const Game& rhs) = delete;
 	Game& operator=(const Game& rhs) = delete;
 	
-
 	static Game* mGame;
 
 	HINSTANCE mhGameInst = nullptr; // application instance handle
@@ -150,12 +148,14 @@ protected:
 	void LogAdapterOutputs(IDXGIAdapter* adapter);
 	void LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);
 
-	//constexpr void InitUpdateFunction(std::function<void(Game* concreteGame, const GameTimer& gt)> update) {
-	constexpr void InitUpdateFunction(void(*update)(Game* concreteGame, const GameTimer& gt) ) {
+
+	constexpr void InitMsgProc(LRESULT(*msgProc)(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)) {
+		msgProcs[0] = msgProc;
+	}
+	constexpr void InitUpdateFunction(void(*update)(Game* concreteGame, const GameTimer& gt)) {
 		//updates.push_back(update);
 		updates[0] = update;
 	}
-	//void InitDrawFunction(std::function<void(Game* concreteGame, const GameTimer& gt)> render) {
 	constexpr void InitDrawFunction(void(*render)(Game* concreteGame, const GameTimer& gt)) {
 		//renders.push_back(render);
 		renders[0] = render;
@@ -184,8 +184,7 @@ private:
 	void Update(const GameTimer& gt);
 	void Draw(const GameTimer& gt);
 	void OnResize();
-	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> updates;
-	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> renders;
+	
 	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> updates;
 	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> renders;
 	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseDownHandlers;
@@ -203,11 +202,36 @@ public:
 	bool Get4xMsaaState()const;
 	void Set4xMsaaState(bool value);
 
-	bool Initialize(std::function<LRESULT(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)> msgProc);
+	template <class CildCaller> bool Initialize();
 	LRESULT BaseMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	static std::function<LRESULT(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)> staticMsgProcPtr;
+	
+	std::array<LRESULT(*)(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam),1> msgProcs;
 
 
 	int Run();
 };
+
+template <class ChildCaller>
+bool Game::Initialize()
+{
+	InitMsgProc(ChildCaller::StaticMsgProc);
+    if (!InitMainWindow())
+        return false;
+
+    if (!InitDirect3D())
+        return false;
+
+	
+    InitUpdateFunction(ChildCaller::StaticUpdate);
+    InitDrawFunction(ChildCaller::StaticDraw);
+    InitOnMouseDownHandlers(ChildCaller::StaticOnMouseDown);
+    InitOnMouseUpHandlers(ChildCaller::StaticOnMouseUp);
+    InitOnMouseMoveHandlers(ChildCaller::StaticOnMouseMove);
+    InitOnResizeHandlers(ChildCaller::StaticOnResize);
+	
+    // Do the initial resize code.
+    OnResize();
+
+    return true;
+}
 

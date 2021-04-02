@@ -11,15 +11,12 @@ using Microsoft::WRL::ComPtr;
 using namespace std;
 using namespace DirectX;
 
-std::function<LRESULT(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)> Game::staticMsgProcPtr;
-
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     // Forward hwnd on because we can get messages (e.g., WM_CREATE)
     // before CreateWindow returns, and thus before mhMainWnd is valid.
-    //return Game::GetGame()->MsgProc(hwnd, msg, wParam, lParam);
 
-    return Game::staticMsgProcPtr(Game::GetGame(), hwnd, msg, wParam, lParam);
+    return Game::GetGame()->msgProcs[0](Game::GetGame(), hwnd, msg, wParam, lParam);
 }
 
 Game* Game::mGame = nullptr;
@@ -73,21 +70,7 @@ void Game::Set4xMsaaState(bool value)
     }
 }
 
-bool Game::Initialize(std::function<LRESULT(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)> msgProc)
-{
-    Game::staticMsgProcPtr = msgProc;
-    if (!InitMainWindow())
-        return false;
 
-    if (!InitDirect3D())
-        return false;
-
-    
-    // Do the initial resize code.
-    OnResize();
-
-    return true;
-}
 
 LRESULT Game::BaseMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
