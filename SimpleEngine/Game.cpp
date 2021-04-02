@@ -202,15 +202,15 @@ LRESULT Game::BaseMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_RBUTTONDOWN:
-        //OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
     case WM_RBUTTONUP:
-        //OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_MOUSEMOVE:
-        //OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_KEYUP:
         if (wParam == VK_ESCAPE)
@@ -265,21 +265,29 @@ void Game::Draw(const GameTimer& gt)
     }
 }
 
-int Game::Run()
-{    
-    /*CreateWindows();
-    ShowWindows();
-
-
-    MSG msg = { };
-    while (GetMessage(&msg, NULL, 0, 0))
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+void Game::OnMouseDown(WPARAM btnState, int x, int y)
+{
+    for (auto handlerCall : onMouseDownHandlers) {
+        handlerCall(this, btnState, x, y);
     }
+}
 
-    return 0;*/
+void Game::OnMouseUp(WPARAM btnState, int x, int y)
+{
+    for (auto handlerCall : onMouseUpHandlers) {
+        handlerCall(this, btnState, x, y);
+    }
+}
 
+void Game::OnMouseMove(WPARAM btnState, int x, int y)
+{
+    for (auto handlerCall : onMouseMoveHandlers) {
+        handlerCall(this, btnState, x, y);
+    }
+}
+
+int Game::Run()
+{
     MSG msg = { 0 };
 
     mTimer.Reset();

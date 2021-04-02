@@ -31,19 +31,7 @@ private:
     XMFLOAT4X4 mView = MathHelper::Identity4x4();
     XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
-	// NECESSARY_STATIC_FUNCTIONS(BoxGame);
-	static LRESULT BoxGame::StaticMsgProc(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-	{
-		return ((BoxGame*)concreteGame)->MsgProc(hwnd, msg, wParam, lParam);
-	}
-	static void BoxGame::StaticUpdate(Game* concreteGame, const GameTimer& gt)
-	{
-		((BoxGame*)concreteGame)->Update(gt);
-	}
-	static void BoxGame::StaticDraw(Game* concreteGame, const GameTimer& gt)
-	{
-		((BoxGame*)concreteGame)->Draw(gt);
-	}
+	NECESSARY_STATIC_FUNCTIONS(BoxGame);
 
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	void Update(const GameTimer& gt);
@@ -57,9 +45,9 @@ private:
 	void BuildBoxGeometry();
 	void BuildPSO();
 
-	virtual void OnMouseDown(WPARAM btnState, int x, int y);
-	virtual void OnMouseUp(WPARAM btnState, int x, int y);
-	virtual void OnMouseMove(WPARAM btnState, int x, int y);
+	void OnMouseDown(WPARAM btnState, int x, int y);
+	void OnMouseUp(WPARAM btnState, int x, int y);
+	void OnMouseMove(WPARAM btnState, int x, int y);
 	
 
 	ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;

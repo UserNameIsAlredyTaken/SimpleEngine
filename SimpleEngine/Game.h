@@ -33,6 +33,18 @@
 	static void GameClass::StaticDraw(Game* concreteGame, const GameTimer& gt)\
 	{\
 		((GameClass*)concreteGame)->Draw(gt);\
+	}\
+	static void GameClass::StaticOnMouseDown(Game* concreteGame, const WPARAM btnState, int x, int y)\
+	{\
+		((GameClass*)concreteGame)->OnMouseDown(btnState, x, y);\
+	}\
+	static void GameClass::StaticOnMouseUp(Game* concreteGame, const WPARAM btnState, int x, int y)\
+	{\
+		((GameClass*)concreteGame)->OnMouseUp(btnState, x, y);\
+	}\
+	static void GameClass::StaticOnMouseMove(Game* concreteGame, const WPARAM btnState, int x, int y)\
+	{\
+		((GameClass*)concreteGame)->OnMouseMove(btnState, x, y);\
 	}
 
 
@@ -41,6 +53,9 @@
 	return false;\
 	InitUpdateFunction(StaticUpdate);\
 	InitDrawFunction(StaticDraw);\
+	InitOnMouseDownHandlers(StaticOnMouseDown);\
+	InitOnMouseUpHandlers(StaticOnMouseUp);\
+	InitOnMouseMoveHandlers(StaticOnMouseMove);\
 	}
 
 class Game
@@ -107,11 +122,11 @@ protected:
 
 	void CreateRtvAndDsvDescriptorHeaps();
 	void OnResize();
-	/*
+	
 	// Convenience overrides for handling mouse input.
-	virtual void OnMouseDown(WPARAM btnState, int x, int y) { }
-	virtual void OnMouseUp(WPARAM btnState, int x, int y) { }
-	virtual void OnMouseMove(WPARAM btnState, int x, int y) { }*/
+	void OnMouseDown(WPARAM btnState, int x, int y);
+	void OnMouseUp(WPARAM btnState, int x, int y);
+	void OnMouseMove(WPARAM btnState, int x, int y);
 
 	bool InitMainWindow();
 	bool InitDirect3D();
@@ -140,6 +155,16 @@ protected:
 		//renders.push_back(render);
 		renders[0] = render;
 	}
+	constexpr void InitOnMouseDownHandlers(void(*handler)(Game* concreteGame, const WPARAM btnState, int x, int y)) {
+		onMouseDownHandlers[0] = handler;
+	}
+	constexpr void InitOnMouseUpHandlers(void(*handler)(Game* concreteGame, const WPARAM btnState, int x, int y)) {
+		onMouseUpHandlers[0] = handler;
+	}
+	constexpr void InitOnMouseMoveHandlers(void(*handler)(Game* concreteGame, const WPARAM btnState, int x, int y)) {
+		onMouseMoveHandlers[0] = handler;
+	}
+	
 
 private:
 	std::set<std::shared_ptr<BaseWindow>> windows;
@@ -154,13 +179,16 @@ private:
 	//std::vector<std::function<void(Game* concreteGame, const GameTimer& gt)>> renders;
 	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> updates;
 	std::array<void(*)(Game* concreteGame, const GameTimer& gt),1> renders;
+	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseDownHandlers;
+	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseUpHandlers;
+	std::array<void(*)(Game* concreteGame, const WPARAM btnState, int x, int y),1> onMouseMoveHandlers;
 
 	
 
 public:
 	static Game* GetGame();
 	HINSTANCE GameInst()const;
-	HWND      MainWnd()const;
+	HWND MainWnd()const;
 	float AspectRatio()const;
 	bool Get4xMsaaState()const;
 	void Set4xMsaaState(bool value);
@@ -171,6 +199,5 @@ public:
 
 
 	int Run();
-
 };
 

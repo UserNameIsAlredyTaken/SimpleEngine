@@ -14,12 +14,7 @@ BoxGame::~BoxGame()
 
 bool BoxGame::Initialize()
 {
-	// NECESSARY_STATIC_INIT();
-	if(!Game::Initialize(StaticMsgProc))
-        return false;
-	InitUpdateFunction(StaticUpdate);
-	InitDrawFunction(StaticDraw);
-
+	NECESSARY_STATIC_INIT();
 	
 	// Reset the command list to prep for initialization commands.
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
