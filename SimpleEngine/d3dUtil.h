@@ -164,18 +164,23 @@ struct MeshGeometry
 
 	// System memory copies.  Use Blobs because the vertex/index format can be generic.
 	// It is up to the client to cast appropriately.  
-	Microsoft::WRL::ComPtr<ID3DBlob> VertexBufferCPU = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> VPosBufferCPU = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> VColorBufferCPU = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> IndexBufferCPU  = nullptr;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> VertexBufferGPU = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> VPosBufferGPU = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> VColorBufferGPU = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> IndexBufferGPU = nullptr;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> VertexBufferUploader = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> VPosBufferUploader = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> VColorBufferUploader = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> IndexBufferUploader = nullptr;
 
     // Data about the buffers.
-	UINT VertexByteStride = 0;
-	UINT VertexBufferByteSize = 0;
+	UINT VPosByteStride = 0;
+	UINT VPosBufferByteSize = 0;
+	UINT VColorByteStride = 0;
+	UINT VColorBufferByteSize = 0;
 	DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
 	UINT IndexBufferByteSize = 0;
 
@@ -184,14 +189,20 @@ struct MeshGeometry
 	// the Submeshes individually.
 	std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
 
-	D3D12_VERTEX_BUFFER_VIEW VertexBufferView()const
+	D3D12_VERTEX_BUFFER_VIEW* VertexBufferViews()const
 	{
-		D3D12_VERTEX_BUFFER_VIEW vbv;
-		vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
-		vbv.StrideInBytes = VertexByteStride;
-		vbv.SizeInBytes = VertexBufferByteSize;
+		D3D12_VERTEX_BUFFER_VIEW positionsBV;
+		positionsBV.BufferLocation = VPosBufferGPU->GetGPUVirtualAddress();
+		positionsBV.StrideInBytes = VPosByteStride;
+		positionsBV.SizeInBytes = VPosBufferByteSize;
 
-		return vbv;
+		D3D12_VERTEX_BUFFER_VIEW colorsBV;
+		colorsBV.BufferLocation = VColorBufferGPU->GetGPUVirtualAddress();
+		colorsBV.StrideInBytes = VColorByteStride;
+		colorsBV.SizeInBytes = VColorBufferByteSize;
+
+		D3D12_VERTEX_BUFFER_VIEW bufferViews[2] = {positionsBV, colorsBV};		
+		return bufferViews;
 	}
 
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView()const
@@ -207,7 +218,8 @@ struct MeshGeometry
 	// We can free this memory after we finish upload to the GPU.
 	void DisposeUploaders()
 	{
-		VertexBufferUploader = nullptr;
+		VPosBufferUploader = nullptr;
+		VColorBufferUploader = nullptr;
 		IndexBufferUploader = nullptr;
 	}
 };

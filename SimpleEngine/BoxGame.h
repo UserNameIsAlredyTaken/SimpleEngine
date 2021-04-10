@@ -6,9 +6,18 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-struct Vertex
+// struct Vertex
+// {
+// 	XMFLOAT3 Pos;
+// 	XMFLOAT4 Color;
+// };
+
+struct VPosData
 {
 	XMFLOAT3 Pos;
+};
+struct VColorData
+{
 	XMFLOAT4 Color;
 };
 
