@@ -15,9 +15,9 @@
 #include "BaseWindow.h"
 #include "set"
 #include "GameTimer.h"
-#include "d3dUtil.h"
+#include "Common/d3dUtil.h"
 #include "d3d12.h"
-#include "d3dx12.h"
+#include "Common/d3dx12.h"
 #include <functional>
 
 #define NECESSARY_STATIC_FUNCTIONS(GameClass)\

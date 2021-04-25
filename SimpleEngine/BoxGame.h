@@ -1,7 +1,7 @@
 #pragma once
 #include "Game.h"
-#include "MathHelper.h"
-#include "UploadBuffer.h"
+#include "Common/MathHelper.h"
+#include "Common/UploadBuffer.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -21,10 +21,10 @@ struct VColorData
 	XMFLOAT4 Color;
 };
 
-struct ObjectConstants
-{
-	XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
-};
+// struct ObjectConstants
+// {
+// 	XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
+// };
 
 class BoxGame : public Game
 {
@@ -59,7 +59,7 @@ private:
 	
 
 	ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
-	std::unique_ptr<UploadBuffer<ObjectConstants>> mObjectCB = nullptr;
+	// std::unique_ptr<UploadBuffer<ObjectConstants>> mObjectCB = nullptr;
 	ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 	ComPtr<ID3DBlob> mvsByteCode = nullptr;
 	ComPtr<ID3DBlob> mpsByteCode = nullptr;

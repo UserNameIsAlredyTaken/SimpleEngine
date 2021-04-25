@@ -305,8 +305,6 @@ int Game::Run()
             {
                 Sleep(100);
             }
-
-            Draw(mTimer);
         }
     }
 

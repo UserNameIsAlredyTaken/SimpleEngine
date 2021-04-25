@@ -3,13 +3,13 @@
 #endif 
 #define _USE_MATH_DEFINES
 
-#include <iostream>
-#include "Game.h"
-#include "RedrawGame.h"
 #include <windows.h>
 #include <math.h>
-#include "BoxGame.h"
-
+#include <iostream>
+// #include "Game.h"
+// #include "RedrawGame.h"
+// #include "BoxGame.h"
+#include "ModelsGame.h"
 
 
 
@@ -23,7 +23,7 @@ int main()
     // RedrawGame game(GetModuleHandle(NULL));
     try
     {
-        BoxGame game(GetModuleHandle(NULL));
+        ModelsGame game(GetModuleHandle(NULL));
         if (!game.Initialize())
             return 0;
         

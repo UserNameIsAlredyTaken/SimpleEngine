@@ -63,9 +63,9 @@ void BoxGame::Update(const GameTimer& gt)
 	XMMATRIX worldViewProj = world*view*proj;
 
 	// Update the constant buffer with the latest worldViewProj matrix.
-	ObjectConstants objConstants;
-	XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
-	mObjectCB->CopyData(0, objConstants);
+	// ObjectConstants objConstants;
+	// XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+	// mObjectCB->CopyData(0, objConstants);
 }
 
 void BoxGame::OnMouseDown(WPARAM btnState, int x, int y)
@@ -136,19 +136,19 @@ void BoxGame::BuildDescriptorHeaps()
 
 void BoxGame::BuildConstantBuffers()
 {
-	mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
-	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	// mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
+	// UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	//
+	// D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mObjectCB->Resource()->GetGPUVirtualAddress();
+	// // Offset to the ith object constant buffer in the buffer.
+	// int boxCBufIndex = 0;
+	// cbAddress += boxCBufIndex * objCBByteSize;
+	//
+	// D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+	// cbvDesc.BufferLocation = cbAddress;
+	// cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 
-	D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mObjectCB->Resource()->GetGPUVirtualAddress();
-	// Offset to the ith object constant buffer in the buffer.
-	int boxCBufIndex = 0;
-	cbAddress += boxCBufIndex * objCBByteSize;
-
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-	cbvDesc.BufferLocation = cbAddress;
-	cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
-
-	md3dDevice->CreateConstantBufferView(&cbvDesc, mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+	// md3dDevice->CreateConstantBufferView(&cbvDesc, mCbvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
 void BoxGame::BuildRootSignature()
@@ -262,26 +262,26 @@ void BoxGame::BuildBoxGeometry()
 	mBoxGeo = std::make_unique<MeshGeometry>();
 	mBoxGeo->Name = "boxGeo";
 
-	ThrowIfFailed(D3DCreateBlob(vbpByteSize, &mBoxGeo->VPosBufferCPU));
-	ThrowIfFailed(D3DCreateBlob(vbcByteSize, &mBoxGeo->VColorBufferCPU));
-	CopyMemory(mBoxGeo->VPosBufferCPU->GetBufferPointer(), vPoses.data(), vbpByteSize);
-	CopyMemory(mBoxGeo->VColorBufferCPU->GetBufferPointer(), vColors.data(), vbcByteSize);
-
-	ThrowIfFailed(D3DCreateBlob(ibByteSize, &mBoxGeo->IndexBufferCPU));
-	CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
-
-	mBoxGeo->VPosBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), vPoses.data(), vbpByteSize, mBoxGeo->VPosBufferUploader);
-	mBoxGeo->VColorBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), vColors.data(), vbcByteSize, mBoxGeo->VColorBufferUploader);
-
-	mBoxGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), indices.data(), ibByteSize, mBoxGeo->IndexBufferUploader);
-
-	mBoxGeo->VPosByteStride = sizeof(VPosData);
-	mBoxGeo->VColorByteStride = sizeof(VColorData);
-	mBoxGeo->VPosBufferByteSize = vbpByteSize;
-	mBoxGeo->VColorBufferByteSize = vbcByteSize;
+	// ThrowIfFailed(D3DCreateBlob(vbpByteSize, &mBoxGeo->VPosBufferCPU));
+	// ThrowIfFailed(D3DCreateBlob(vbcByteSize, &mBoxGeo->VColorBufferCPU));
+	// CopyMemory(mBoxGeo->VPosBufferCPU->GetBufferPointer(), vPoses.data(), vbpByteSize);
+	// CopyMemory(mBoxGeo->VColorBufferCPU->GetBufferPointer(), vColors.data(), vbcByteSize);
+ //
+	// ThrowIfFailed(D3DCreateBlob(ibByteSize, &mBoxGeo->IndexBufferCPU));
+	// CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+ //
+	// mBoxGeo->VPosBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+	// 	mCommandList.Get(), vPoses.data(), vbpByteSize, mBoxGeo->VPosBufferUploader);
+	// mBoxGeo->VColorBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+ //        mCommandList.Get(), vColors.data(), vbcByteSize, mBoxGeo->VColorBufferUploader);
+ //
+	// mBoxGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+	// 	mCommandList.Get(), indices.data(), ibByteSize, mBoxGeo->IndexBufferUploader);
+ //
+	// mBoxGeo->VPosByteStride = sizeof(VPosData);
+	// mBoxGeo->VColorByteStride = sizeof(VColorData);
+	// mBoxGeo->VPosBufferByteSize = vbpByteSize;
+	// mBoxGeo->VColorBufferByteSize = vbcByteSize;
 	mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	mBoxGeo->IndexBufferByteSize = ibByteSize;
 
@@ -356,7 +356,7 @@ void BoxGame::Draw(const GameTimer& gt)
 
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-	mCommandList->IASetVertexBuffers(0, 2, mBoxGeo->VertexBufferViews());
+	// mCommandList->IASetVertexBuffers(0, 2, mBoxGeo->VertexBufferViews());
 	mCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());	
 	mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     
