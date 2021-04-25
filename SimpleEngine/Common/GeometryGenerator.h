@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <DirectXMath.h>
+#include <string>
 #include <vector>
 
 class GeometryGenerator
@@ -73,6 +74,8 @@ public:
 	private:
 		std::vector<uint16> mIndices16;
 	};
+
+	MeshData LoadMesh(std::string fileLocation);
 
 	///<summary>
 	/// Creates a box centered at the origin with the given dimensions, where each

@@ -7,6 +7,21 @@
 
 using namespace DirectX;
 
+/*#include <iostream>
+#include <fstream>
+#include <fbxsdk.h>*/
+GeometryGenerator::MeshData GeometryGenerator::LoadMesh(std::string fileLocation)
+{
+	/*std::ofstream meshDataFile;
+	meshDataFile.open(fileLocation);
+	if(meshDataFile.is_open())
+	{
+		
+	}*/
+	MeshData meshData;
+	return meshData;
+}
+
 GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float height, float depth, uint32 numSubdivisions)
 {
     MeshData meshData;
