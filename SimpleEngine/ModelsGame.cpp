@@ -378,9 +378,9 @@ void ModelsGame::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);	
-	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
+	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");	
-	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
+	GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
@@ -552,7 +552,7 @@ void ModelsGame::BuildFrameResources()
 void ModelsGame::BuildRenderItems()
 {
 	auto boxRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(6.0f, 6.0f, 6.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(3.0f, 3.0f, 3.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 	boxRitem->ObjCBIndex = 0;
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
 	boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

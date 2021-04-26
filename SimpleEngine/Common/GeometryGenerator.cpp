@@ -32,6 +32,7 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
     
     if(rootNode)
     {
+    	int i = 0;
         for(int nodeNum = 0; nodeNum < rootNode->GetChildCount(); ++nodeNum)
         {
         	
@@ -49,7 +50,7 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
         	assert(meshNormals->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
         	assert(meshNormals->GetReferenceMode() == FbxGeometryElement::eDirect);
 
-            int i = 0;
+            
             for(int poligonNum = 0; poligonNum < mesh->GetPolygonCount(); ++poligonNum)
             {
             	// printf("Poligon%i:\n", poligonNum);
