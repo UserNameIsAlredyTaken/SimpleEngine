@@ -50,7 +50,7 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
         	assert(meshNormals->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
         	assert(meshNormals->GetReferenceMode() == FbxGeometryElement::eDirect);
 
-        	
+        	int normalsCount = 0; //each node has it's own normals  
             for(int poligonNum = 0; poligonNum < mesh->GetPolygonCount(); ++poligonNum)
             {
             	//add indices for the poligon
@@ -62,10 +62,10 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
             	}
 
             	//add vertex for the poligon
-            	for(int vertexInPoligonNum = 0; vertexInPoligonNum < mesh->GetPolygonSize(poligonNum); ++ vertexInPoligonNum, ++vertexCount)
+            	for(int vertexInPoligonNum = 0; vertexInPoligonNum < mesh->GetPolygonSize(poligonNum); ++vertexInPoligonNum, ++vertexCount, ++normalsCount)
             	{
             		int poligonVertex = mesh->GetPolygonVertex(poligonNum, vertexInPoligonNum);
-            		FbxVector4 normal = meshNormals->GetDirectArray().GetAt(vertexCount);
+            		FbxVector4 normal = meshNormals->GetDirectArray().GetAt(normalsCount);
             		meshData.Vertices.push_back(Vertex(
 							(float)meshVertices[poligonVertex].mData[0],
 							(float)meshVertices[poligonVertex].mData[1],
