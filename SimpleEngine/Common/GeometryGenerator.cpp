@@ -7,18 +7,81 @@
 
 using namespace DirectX;
 
-/*#include <iostream>
-#include <fstream>
-#include <fbxsdk.h>*/
-GeometryGenerator::MeshData GeometryGenerator::LoadMesh(std::string fileLocation)
+GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocation)
 {
-	/*std::ofstream meshDataFile;
-	meshDataFile.open(fileLocation);
-	if(meshDataFile.is_open())
-	{
-		
-	}*/
 	MeshData meshData;
+	
+	FbxManager* fbxManager = FbxManager::Create();
+	FbxIOSettings* fbxIO = FbxIOSettings::Create(fbxManager, IOSROOT );
+	fbxManager->SetIOSettings(fbxIO);
+    
+    FbxImporter* fbxImporter = FbxImporter::Create(fbxManager,"");    
+    
+    if(!fbxImporter->Initialize(fileLocation, -1, fbxManager->GetIOSettings()))
+    {
+    	printf("Call to FbxImporter::Initialize() failed.\n"); 
+    	printf("Error returned: %s\n\n", fbxImporter->GetStatus().GetErrorString()); 
+    	exit(-1);
+    }
+	
+	FbxScene* fbxScene = FbxScene::Create(fbxManager,"");
+    fbxImporter->Import(fbxScene);    
+    fbxImporter->Destroy();
+    
+    FbxNode* rootNode = fbxScene->GetRootNode();
+    
+    if(rootNode)
+    {
+        for(int nodeNum = 0; nodeNum < rootNode->GetChildCount(); ++nodeNum)
+        {
+        	
+            FbxNode* fbxChildNode = rootNode->GetChild(nodeNum);
+
+        	FbxNodeAttribute* nodeAttribute = fbxChildNode->GetNodeAttribute();
+            if(nodeAttribute == NULL || nodeAttribute->GetAttributeType() != FbxNodeAttribute::eMesh)
+                continue;
+                        
+            FbxMesh* mesh = (FbxMesh*) nodeAttribute;
+
+            
+            FbxVector4* meshVertices = mesh->GetControlPoints();
+            
+            for(int poligonNum = 0; poligonNum < mesh->GetPolygonCount(); ++poligonNum)
+            {
+            	int numVertices = mesh->GetPolygonSize(poligonNum);
+            	
+            	int zeroVertexIndex = mesh->GetPolygonVertex(poligonNum, 0);
+            	Vertex zeroVertex = Vertex(
+            			(float)meshVertices[zeroVertexIndex].mData[0],
+						(float)meshVertices[zeroVertexIndex].mData[1],
+						(float)meshVertices[zeroVertexIndex].mData[2], 0,0,0,0,0,0,0,0);
+
+            	
+
+            	meshData.Vertices.push_back(zeroVertex);
+	            for(int triangleNum = 0; triangleNum < numVertices - 2; ++triangleNum)
+	            {
+	            	
+	            	int firstIndex = mesh->GetPolygonVertex(poligonNum, triangleNum + 1);
+	            	int secondIndex = mesh->GetPolygonVertex(poligonNum, triangleNum + 2);
+
+	            	meshData.Vertices.push_back(Vertex(
+						(float)meshVertices[firstIndex].mData[0],
+						(float)meshVertices[firstIndex].mData[1],
+						(float)meshVertices[firstIndex].mData[2], 0,0,0,0,0,0,0,0));
+	            	meshData.Vertices.push_back(Vertex(
+						(float)meshVertices[secondIndex].mData[0],
+						(float)meshVertices[secondIndex].mData[1],
+						(float)meshVertices[secondIndex].mData[2], 0,0,0,0,0,0,0,0));
+
+	            	meshData.Indices32.push_back(zeroVertexIndex);
+	            	meshData.Indices32.push_back(firstIndex);
+	            	meshData.Indices32.push_back(secondIndex);
+	            }
+            }               
+        }    
+    }
+	
 	return meshData;
 }
 

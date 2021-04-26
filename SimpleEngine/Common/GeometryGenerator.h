@@ -18,6 +18,7 @@
 #include <DirectXMath.h>
 #include <string>
 #include <vector>
+#include <fbxsdk.h>
 
 class GeometryGenerator
 {
@@ -75,7 +76,7 @@ public:
 		std::vector<uint16> mIndices16;
 	};
 
-	MeshData LoadMesh(std::string fileLocation);
+	MeshData LoadMesh(const char* fileLocation);
 
 	///<summary>
 	/// Creates a box centered at the origin with the given dimensions, where each
