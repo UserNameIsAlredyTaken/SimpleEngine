@@ -41,20 +41,28 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
             if(nodeAttribute == NULL || nodeAttribute->GetAttributeType() != FbxNodeAttribute::eMesh)
                 continue;
                         
-            FbxMesh* mesh = (FbxMesh*) nodeAttribute;
+            FbxMesh* mesh = (FbxMesh*) nodeAttribute;      	
 
-            
             FbxVector4* meshVertices = mesh->GetControlPoints();
+        	FbxGeometryElementNormal* meshNormals = mesh->GetElementNormal();
+
+        	assert(meshNormals->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+        	assert(meshNormals->GetReferenceMode() == FbxGeometryElement::eDirect);
+
             
             for(int poligonNum = 0; poligonNum < mesh->GetPolygonCount(); ++poligonNum)
             {
             	int numVertices = mesh->GetPolygonSize(poligonNum);
             	
             	int zeroVertexIndex = mesh->GetPolygonVertex(poligonNum, 0);
+            	FbxVector4 normal = meshNormals->GetDirectArray().GetAt(zeroVertexIndex);
             	Vertex zeroVertex = Vertex(
             			(float)meshVertices[zeroVertexIndex].mData[0],
 						(float)meshVertices[zeroVertexIndex].mData[1],
-						(float)meshVertices[zeroVertexIndex].mData[2], 0,0,0,0,0,0,0,0);
+						(float)meshVertices[zeroVertexIndex].mData[2],
+						normal[0],
+						normal[1],
+						normal[2],0,0,0,0,0);
 
             	
 
@@ -65,14 +73,23 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
 	            	int firstIndex = mesh->GetPolygonVertex(poligonNum, triangleNum + 1);
 	            	int secondIndex = mesh->GetPolygonVertex(poligonNum, triangleNum + 2);
 
+	            	normal = meshNormals->GetDirectArray().GetAt(firstIndex);
 	            	meshData.Vertices.push_back(Vertex(
 						(float)meshVertices[firstIndex].mData[0],
 						(float)meshVertices[firstIndex].mData[1],
-						(float)meshVertices[firstIndex].mData[2], 0,0,0,0,0,0,0,0));
+						(float)meshVertices[firstIndex].mData[2],
+						normal[0],
+						normal[1],
+						normal[2],0,0,0,0,0));
+
+	            	normal = meshNormals->GetDirectArray().GetAt(secondIndex);
 	            	meshData.Vertices.push_back(Vertex(
 						(float)meshVertices[secondIndex].mData[0],
 						(float)meshVertices[secondIndex].mData[1],
-						(float)meshVertices[secondIndex].mData[2], 0,0,0,0,0,0,0,0));
+						(float)meshVertices[secondIndex].mData[2],
+						normal[0],
+						normal[1],
+						normal[2],0,0,0,0,0));
 
 	            	meshData.Indices32.push_back(zeroVertexIndex);
 	            	meshData.Indices32.push_back(firstIndex);
@@ -81,7 +98,11 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
             }               
         }    
     }
+
 	
+            	
+	printf("%i\n", meshData.Vertices.size());
+	printf("%i\n", meshData.Indices32.size());
 	return meshData;
 }
 
