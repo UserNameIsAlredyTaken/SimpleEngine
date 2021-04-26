@@ -380,8 +380,8 @@ void ModelsGame::BuildShapeGeometry()
     GeometryGenerator geoGen;
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);	
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
-	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");	
+	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
+	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");	
 	// GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
