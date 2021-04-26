@@ -30,6 +30,7 @@ struct PassConstants
 struct Vertex
 {
     DirectX::XMFLOAT3 Pos;
+    DirectX::XMFLOAT3 Norm;    
     DirectX::XMFLOAT4 Color;
 };
 

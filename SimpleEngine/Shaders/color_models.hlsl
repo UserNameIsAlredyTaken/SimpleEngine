@@ -30,6 +30,7 @@ cbuffer cbPass : register(b1)
 struct VertexIn
 {
 	float3 PosL  : POSITION;
+	float3 NormL : NORMALS;
     float4 Color : COLOR;
 };
 
@@ -48,13 +49,20 @@ VertexOut VS(VertexIn vin)
     vout.PosH = mul(posW, gViewProj);
 
 	// Just pass vertex color into the pixel shader.
-    vout.Color = vin.Color;
+    //vout.Color = vin.Color;
+    
+	vout.Color.r = (vin.NormL.r + 1) / 2;
+	vout.Color.g = (vin.NormL.g + 1) / 2;
+	vout.Color.b = (vin.NormL.b + 1) / 2;
+	vout.Color.a = 1;
+    
+	//vout.Color.rgba = vin.NormL.bgrr;
 
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	pin.Color.rgb = (1, 1, 1);
+	//pin.Color.rgb = (1, 1, 1);
     return pin.Color;
 }

@@ -370,7 +370,8 @@ void ModelsGame::BuildShadersAndInputLayout()
     mInputLayout =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMALS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 }
 
@@ -378,9 +379,10 @@ void ModelsGame::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);	
-	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");	
-	GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
+	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
+	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
+	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");	
+	// GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
@@ -441,24 +443,28 @@ void ModelsGame::BuildShapeGeometry()
 	for(size_t i = 0; i < box.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = box.Vertices[i].Position;
+		vertices[k].Norm = box.Vertices[i].Normal;
         vertices[k].Color = XMFLOAT4(DirectX::Colors::DarkGreen);
 	}
 
 	for(size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = grid.Vertices[i].Position;
+		vertices[k].Norm = grid.Vertices[i].Normal;
         vertices[k].Color = XMFLOAT4(DirectX::Colors::ForestGreen);
 	}
 
 	for(size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = sphere.Vertices[i].Position;
+		vertices[k].Norm = sphere.Vertices[i].Normal;
         vertices[k].Color = XMFLOAT4(DirectX::Colors::Crimson);
 	}
 
 	for(size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = cylinder.Vertices[i].Position;
+		vertices[k].Norm = cylinder.Vertices[i].Normal;
 		vertices[k].Color = XMFLOAT4(DirectX::Colors::SteelBlue);
 	}
 
@@ -552,7 +558,7 @@ void ModelsGame::BuildFrameResources()
 void ModelsGame::BuildRenderItems()
 {
 	auto boxRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(3.0f, 3.0f, 3.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.0f, 1.0f, 1.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
 	boxRitem->ObjCBIndex = 0;
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
 	boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

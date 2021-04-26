@@ -32,7 +32,7 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
     
     if(rootNode)
     {
-    	int i = 0;
+    	int vertexCount = 0;
         for(int nodeNum = 0; nodeNum < rootNode->GetChildCount(); ++nodeNum)
         {
         	
@@ -50,66 +50,41 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
         	assert(meshNormals->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
         	assert(meshNormals->GetReferenceMode() == FbxGeometryElement::eDirect);
 
-            
+        	
             for(int poligonNum = 0; poligonNum < mesh->GetPolygonCount(); ++poligonNum)
             {
-            	// printf("Poligon%i:\n", poligonNum);
-            	int numVertices = mesh->GetPolygonSize(poligonNum);
+            	for(int triangleNum = 0; triangleNum < mesh->GetPolygonSize(poligonNum) - 2; ++triangleNum)
+            	{
+            		meshData.Indices32.push_back(vertexCount);
+            		meshData.Indices32.push_back(vertexCount + triangleNum + 1);
+            		meshData.Indices32.push_back(vertexCount + triangleNum + 2);
+            	}
             	
-            	int zeroVertexIndex = mesh->GetPolygonVertex(poligonNum, 0);
-            	FbxVector4 normal = meshNormals->GetDirectArray().GetAt(zeroVertexIndex);
-            	Vertex zeroVertex = Vertex(
-            			(float)meshVertices[zeroVertexIndex].mData[0],
-						(float)meshVertices[zeroVertexIndex].mData[1],
-						(float)meshVertices[zeroVertexIndex].mData[2],
-						normal[0],
-						normal[1],
-						normal[2],0,0,0,0,0);
-            	
-
-            	
-	            for(int triangleNum = 0; triangleNum < numVertices - 2; ++triangleNum)
-	            {
-	            	// printf("	Triangle%i:\n", triangleNum);
-	            	
-	            	int firstIndex = mesh->GetPolygonVertex(poligonNum, triangleNum + 1);
-	            	int secondIndex = mesh->GetPolygonVertex(poligonNum, triangleNum + 2);
-
-	            	normal = meshNormals->GetDirectArray().GetAt(firstIndex);
-	            	Vertex firstVertex = Vertex(
-						(float)meshVertices[firstIndex].mData[0],
-						(float)meshVertices[firstIndex].mData[1],
-						(float)meshVertices[firstIndex].mData[2],
-						normal[0],
-						normal[1],
-						normal[2],0,0,0,0,0);
-
-	            	normal = meshNormals->GetDirectArray().GetAt(secondIndex);
-	            	Vertex secondVertex = Vertex(
-						(float)meshVertices[secondIndex].mData[0],
-						(float)meshVertices[secondIndex].mData[1],
-						(float)meshVertices[secondIndex].mData[2],
-						normal[0],
-						normal[1],
-						normal[2],0,0,0,0,0);
-
-	            	meshData.Vertices.push_back(zeroVertex);
-	            	meshData.Vertices.push_back(firstVertex);
-	            	meshData.Vertices.push_back(secondVertex);
-	            	
-	            	meshData.Indices32.push_back(i++);
-	            	meshData.Indices32.push_back(i++);
-	            	meshData.Indices32.push_back(i++);
-
-	            	// printf("		Ver0(%f, %f, %f)\n", zeroVertex.Position.x, zeroVertex.Position.y, zeroVertex.Position.z);
-	            	// printf("		Ver1(%f, %f, %f)\n", firstVertex.Position.x, firstVertex.Position.y, firstVertex.Position.z);
-	            	// printf("		Ver2(%f, %f, %f)\n", secondVertex.Position.x, secondVertex.Position.y, secondVertex.Position.z);
-		            //
-	            	// printf("		Ind(%i)\n", poligonNum * 6 + triangleNum);
-	            	// printf("		Ind(%i)\n", poligonNum * 6 + triangleNum + 1);
-	            	// printf("		Ind(%i)\n", poligonNum * 6 + triangleNum + 2);
-	            	
-	            }
+            	for(int vertexInPoligonNum = 0; vertexInPoligonNum < mesh->GetPolygonSize(poligonNum); ++ vertexInPoligonNum, ++vertexCount)
+            	{
+            		int poligonVertex = mesh->GetPolygonVertex(poligonNum, vertexInPoligonNum);
+            		FbxVector4 normal = meshNormals->GetDirectArray().GetAt(vertexCount + vertexInPoligonNum);
+            		meshData.Vertices.push_back(Vertex(
+							(float)meshVertices[poligonVertex].mData[0],
+							(float)meshVertices[poligonVertex].mData[1],
+							(float)meshVertices[poligonVertex].mData[2],
+							normal[0],
+							normal[1],
+							normal[2],0,0,0,0,0));
+            	}
+	     //
+	     //        	printf("		Ver0(%f, %f, %f)\n", zeroVertex.Normal.x, zeroVertex.Normal.y, zeroVertex.Normal.z);
+	     //        	printf("		Ver1(%f, %f, %f)\n", firstVertex.Normal.x, firstVertex.Normal.y, firstVertex.Normal.z);
+	     //        	printf("		Ver2(%f, %f, %f)\n", secondVertex.Normal.x, secondVertex.Normal.y, secondVertex.Normal.z);
+	     //        	// printf("		Ver0(%f, %f, %f)\n", zeroVertex.Position.x, zeroVertex.Position.y, zeroVertex.Position.z);
+	     //        	// printf("		Ver1(%f, %f, %f)\n", firstVertex.Position.x, firstVertex.Position.y, firstVertex.Position.z);
+	     //        	// printf("		Ver2(%f, %f, %f)\n", secondVertex.Position.x, secondVertex.Position.y, secondVertex.Position.z);
+		    //         //
+	     //        	// printf("		Ind(%i)\n", poligonNum * 6 + triangleNum);
+	     //        	// printf("		Ind(%i)\n", poligonNum * 6 + triangleNum + 1);
+	     //        	// printf("		Ind(%i)\n", poligonNum * 6 + triangleNum + 2);
+	     //        	
+	     //        }
             	// printf("\n");
             }               
         }    
