@@ -357,6 +357,7 @@
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelsGame.cpp" />
+    <ClCompile Include="NewModelsGame.cpp" />
     <ClCompile Include="RedrawGame.cpp" />
     <ClCompile Include="TestRedCircleWindow.cpp" />
     <ClCompile Include="WindowStyle.cpp" />
@@ -375,6 +376,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="ModelsGame.h" />
+    <ClInclude Include="NewModelsGame.h" />
     <ClInclude Include="RedrawGame.h" />
     <ClInclude Include="TestRedCircleWindow.h" />
     <ClInclude Include="WindowStyle.h" />

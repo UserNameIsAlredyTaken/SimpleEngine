@@ -6,7 +6,6 @@
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 
-// const int gNumFrameResources = 3;
 struct RenderItem
 {
     RenderItem() = default;
@@ -26,6 +25,12 @@ struct RenderItem
     UINT IndexCount = 0;
     UINT StartIndexLocation = 0;
     int BaseVertexLocation = 0;
+};
+
+enum class RenderLayer : int
+{
+    Opaque = 0,
+    Count
 };
 
 class ModelsGame : public Game
@@ -52,8 +57,6 @@ private:
     void OnMouseUp(WPARAM btnState, int x, int y);
     void OnMouseMove(WPARAM btnState, int x, int y);
 
-    void BuildDescriptorHeaps();
-    void BuildConstantBufferViews();
     void BuildRootSignature();
     void BuildShadersAndInputLayout();
     void BuildShapeGeometry();
@@ -82,7 +85,8 @@ private:
     std::vector<std::unique_ptr<RenderItem>> mAllRitems;
 
     // Render items divided by PSO.
-    std::vector<RenderItem*> mOpaqueRitems;
+    // std::vector<RenderItem*> mOpaqueRitems;
+    std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
 
     PassConstants mMainPassCB;
 
