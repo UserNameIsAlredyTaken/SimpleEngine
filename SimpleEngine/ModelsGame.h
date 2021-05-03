@@ -11,12 +11,14 @@ struct RenderItem
     RenderItem() = default;
 
     XMFLOAT4X4 World = MathHelper::Identity4x4();
+    XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
 
     int NumFramesDirty = gNumFrameResources;
 
     // Index into GPU constant buffer corresponding to the ObjectCB for this render item.
     UINT ObjCBIndex = -1;
 
+    Material* Mat = nullptr;
     MeshGeometry* Geo = nullptr;
 
     D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -49,8 +51,11 @@ private:
     void Draw(const GameTimer& gt);
     void OnResize();
 
+    void OnKeyboardInput(const GameTimer& gt);
     void UpdateCamera(const GameTimer& gt);
+    void AnimateMaterials(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
+    void UpdateMaterialCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
 
     void OnMouseDown(WPARAM btnState, int x, int y);
@@ -62,6 +67,7 @@ private:
     void BuildShapeGeometry();
     void BuildPSOs();
     void BuildFrameResources();
+    void BuildMaterials();
     void BuildRenderItems();
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
@@ -70,13 +76,17 @@ private:
     FrameResource* mCurrFrameResource = nullptr;
     int mCurrFrameResourceIndex = 0;
 
+    UINT mCbvSrvDescriptorSize = 0;
+    
     ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
-    ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
 
     ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;
 
     std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
+    std::unordered_map<std::string, std::unique_ptr<Material>> mMaterials;
+    std::unordered_map<std::string, std::unique_ptr<Texture>> mTextures;
     std::unordered_map<std::string, ComPtr<ID3DBlob>> mShaders;
+    
     std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> mPSOs;
 
     std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
