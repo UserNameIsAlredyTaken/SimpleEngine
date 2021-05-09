@@ -190,6 +190,21 @@ void ModelsGame::OnMouseMove(WPARAM btnState, int x, int y)
 
 void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 {
+	const float dt = gt.DeltaTime();
+
+	if(GetAsyncKeyState(VK_LEFT) & 0x8000)
+		lightTheta -= lightRotationSpeed*dt;
+
+	if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
+		lightTheta += lightRotationSpeed*dt;
+
+	if(GetAsyncKeyState(VK_UP) & 0x8000)
+		lightPhi -= lightRotationSpeed*dt;
+
+	if(GetAsyncKeyState(VK_DOWN) & 0x8000)
+		lightPhi += lightRotationSpeed*dt;
+
+	lightPhi = MathHelper::Clamp(lightPhi, 0.1f, XM_PIDIV2);
 }
 
 void ModelsGame::UpdateCamera(const GameTimer& gt)
@@ -284,8 +299,11 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
     mMainPassCB.DeltaTime = gt.DeltaTime();
 	
 	mMainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-	mMainPassCB.Lights[0].Strength = { 0.6f, 0.6f, 0.6f };
+	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(1.0f, lightTheta, lightPhi);
+
+	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
+	// mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
+	mMainPassCB.Lights[0].Strength = { 0.7f, 0.7f, 0.7f };
 
     auto currPassCB = mCurrFrameResource->PassCB.get();
     currPassCB->CopyData(0, mMainPassCB);
@@ -351,7 +369,8 @@ void ModelsGame::BuildShapeGeometry()
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);	
 	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
-	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");	
+	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");
+	// GeometryGenerator::MeshData box = geoGen.CreateSphere(0.5f, 20, 20);	
 	GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
@@ -531,9 +550,9 @@ void ModelsGame::BuildMaterials()
 	mat->Name = "Car";
 	mat->MatCBIndex = 0;
 	mat->DiffuseSrvHeapIndex = 0;
-	mat->DiffuseAlbedo = XMFLOAT4(Colors::LightGray);
-	mat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05);
-	mat->Roughness = 0.2f;
+	mat->DiffuseAlbedo = XMFLOAT4(Colors::OrangeRed);
+	mat->FresnelR0 = XMFLOAT3(1.0f, 0.71f, 0.29f);
+	mat->Roughness = 0.5f;
 
 	mMaterials["Car"] = std::move(mat);
 }

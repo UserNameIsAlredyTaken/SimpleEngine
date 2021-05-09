@@ -110,5 +110,10 @@ private:
     float mPhi = XM_PIDIV2;
     float mRadius = 5.0f;
 
+    float lightTheta = 1.25f*XM_PI;;
+    float lightPhi = XM_PIDIV2;
+
+    float lightRotationSpeed = 2.0f;
+
     POINT mLastMousePos;
 };

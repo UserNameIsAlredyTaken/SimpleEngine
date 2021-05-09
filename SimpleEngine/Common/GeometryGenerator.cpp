@@ -1,6 +1,4 @@
-﻿//***************************************************************************************
-// GeometryGenerator.cpp by Frank Luna (C) 2011 All Rights Reserved.
-//***************************************************************************************
+﻿//http://docs.autodesk.com/FBX/2014/ENU/FBX-SDK-Documentation/index.html?url=cpp_ref/_u_v_sample_2main_8cxx-example.html,topicNumber=cpp_ref__u_v_sample_2main_8cxx_example_html8f1d53ae-3c78-4711-bae3-747bfdc5bb81
 
 #include "GeometryGenerator.h"
 #include <algorithm>
@@ -47,10 +45,21 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
             FbxVector4* meshVertices = mesh->GetControlPoints();
         	FbxGeometryElementNormal* meshNormals = mesh->GetElementNormal();
 
+
+
+
+        	FbxStringList lUVSetNameList;
+        	mesh->GetUVSetNames(lUVSetNameList);        	
+        	const char* UVSetName = lUVSetNameList.GetStringAt(0); //get only first UV set
+        	const FbxGeometryElementUV* UVElement = mesh->GetElementUV(UVSetName);
+        	assert(UVElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+        	assert(UVElement->GetReferenceMode() != FbxGeometryElement::eDirect);      	
+        	
+
         	assert(meshNormals->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
         	assert(meshNormals->GetReferenceMode() == FbxGeometryElement::eDirect);
 
-        	int normalsCount = 0; //each node has it's own normals  
+        	int vertexNum = 0; //each node has it's own normals  
             for(int poligonNum = 0; poligonNum < mesh->GetPolygonCount(); ++poligonNum)
             {
             	//add indices for the poligon
@@ -62,22 +71,25 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
             	}
 
             	//add vertex for the poligon
-            	for(int vertexInPoligonNum = 0; vertexInPoligonNum < mesh->GetPolygonSize(poligonNum); ++vertexInPoligonNum, ++vertexCount, ++normalsCount)
+            	for(int vertexInPoligonNum = 0; vertexInPoligonNum < mesh->GetPolygonSize(poligonNum); ++vertexInPoligonNum, ++vertexCount, ++vertexNum)
             	{
+            		FbxVector2 UVValue = UVElement->GetDirectArray().GetAt(vertexNum);
+            		
             		int poligonVertex = mesh->GetPolygonVertex(poligonNum, vertexInPoligonNum);
-            		FbxVector4 normal = meshNormals->GetDirectArray().GetAt(normalsCount);
+            		FbxVector4 normal = meshNormals->GetDirectArray().GetAt(vertexNum);
             		meshData.Vertices.push_back(Vertex(
 							(float)meshVertices[poligonVertex].mData[0],
 							(float)meshVertices[poligonVertex].mData[1],
 							(float)meshVertices[poligonVertex].mData[2],
 							normal[0],
 							normal[1],
-							normal[2],0,0,0,0,0));
+							normal[2],
+							0,0,0,
+							UVValue[0],UVValue[1]));
             	}	     
-            }               
-        }    
-    }
-            	
+            }   
+        }    	
+    }            	
 	// printf("%i\n", meshData.Vertices.size());
 	// printf("%i\n", meshData.Indices32.size());
 	return meshData;
