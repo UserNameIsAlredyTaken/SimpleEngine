@@ -322,7 +322,7 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
 
 	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
 	// mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-	mMainPassCB.Lights[0].Strength = { 0.5f, 0.5f, 0.5f };
+	mMainPassCB.Lights[0].Strength = { 0.2f, 0.4f, 0.2f };
 
     auto currPassCB = mCurrFrameResource->PassCB.get();
     currPassCB->CopyData(0, mMainPassCB);
