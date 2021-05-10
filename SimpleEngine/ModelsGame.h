@@ -53,6 +53,7 @@ private:
 
     void OnKeyboardInput(const GameTimer& gt);
     void UpdateCamera(const GameTimer& gt);
+    void UpdateSunPosition();
     void AnimateMaterials(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
     void UpdateMaterialCBs(const GameTimer& gt);
@@ -62,7 +63,9 @@ private:
     void OnMouseUp(WPARAM btnState, int x, int y);
     void OnMouseMove(WPARAM btnState, int x, int y);
 
+    void LoadTextures();
     void BuildRootSignature();
+    void BuildDescriptorHeaps();
     void BuildShadersAndInputLayout();
     void BuildShapeGeometry();
     void BuildPSOs();
@@ -71,6 +74,7 @@ private:
     void BuildRenderItems();
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
+    std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 
     std::vector<std::unique_ptr<FrameResource>> mFrameResources;
     FrameResource* mCurrFrameResource = nullptr;
@@ -113,7 +117,9 @@ private:
     float lightTheta = 1.25f*XM_PI;;
     float lightPhi = XM_PIDIV2;
 
-    float lightRotationSpeed = 2.0f;
+    float lightRotationSpeed = 3.0f;
 
     POINT mLastMousePos;
 };
+
+

@@ -26,7 +26,9 @@ bool ModelsGame::Initialize()
 
 	mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	
+	LoadTextures();
     BuildRootSignature();
+	BuildDescriptorHeaps();
     BuildShadersAndInputLayout();
     BuildShapeGeometry();
 	BuildMaterials();
@@ -63,6 +65,8 @@ void ModelsGame::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
     UpdateCamera(gt);
+	UpdateSunPosition();
+	
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -109,8 +113,8 @@ void ModelsGame::Draw(const GameTimer& gt)
     // Specify the buffers we are going to render to.
     mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
-    // ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap.Get() };
-    // mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+    ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
+    mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
@@ -205,6 +209,7 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 		lightPhi += lightRotationSpeed*dt;
 
 	lightPhi = MathHelper::Clamp(lightPhi, 0.1f, XM_PIDIV2);
+	// printf("%f,%f\n", lightPhi, lightTheta);
 }
 
 void ModelsGame::UpdateCamera(const GameTimer& gt)
@@ -223,6 +228,18 @@ void ModelsGame::UpdateCamera(const GameTimer& gt)
     XMStoreFloat4x4(&mView, view);
 }
 
+void ModelsGame::UpdateSunPosition()
+{
+	XMMATRIX translation = XMMatrixTranslation(
+			-mMainPassCB.Lights[0].Direction.x * 5,
+				-mMainPassCB.Lights[0].Direction.y * 5,
+				-mMainPassCB.Lights[0].Direction.z * 5);
+
+	RenderItem* sun = mRitemLayer[(int)RenderLayer::Opaque][mRitemLayer[(int)RenderLayer::Opaque].size() - 1];
+	XMStoreFloat4x4(&sun->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*translation);
+	sun->NumFramesDirty = gNumFrameResources;
+}
+
 void ModelsGame::AnimateMaterials(const GameTimer& gt)
 {
 	
@@ -238,9 +255,11 @@ void ModelsGame::UpdateObjectCBs(const GameTimer& gt)
         if(e->NumFramesDirty > 0)
         {
             XMMATRIX world = XMLoadFloat4x4(&e->World);
+        	XMMATRIX texTransform = XMLoadFloat4x4(&e->TexTransform);
 
             ObjectConstants objConstants;
             XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
+        	XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
 
             currObjectCB->CopyData(e->ObjCBIndex, objConstants);
 
@@ -298,31 +317,53 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
     mMainPassCB.TotalTime = gt.TotalTime();
     mMainPassCB.DeltaTime = gt.DeltaTime();
 	
-	mMainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
+	mMainPassCB.AmbientLight = { 0.3f, 0.3f, 0.3f, 1.0f };
 	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(1.0f, lightTheta, lightPhi);
 
 	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
 	// mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-	mMainPassCB.Lights[0].Strength = { 0.7f, 0.7f, 0.7f };
+	mMainPassCB.Lights[0].Strength = { 0.5f, 0.5f, 0.5f };
 
     auto currPassCB = mCurrFrameResource->PassCB.get();
     currPassCB->CopyData(0, mMainPassCB);
 }
 
+void ModelsGame::LoadTextures()
+{
+	auto carTex = std::make_unique<Texture>();
+	carTex->Name = "carTex";
+	carTex->Filename = L"C:/Projects/SimpleEngine/SimpleEngine/Textures/car_1.dds";
+	// carTex->Filename = L"C:/Projects/SimpleEngine/SimpleEngine/Textures/uv_test.dds";
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+		mCommandList.Get(), carTex->Filename.c_str(),
+		carTex->Resource, carTex->UploadHeap));
+
+	mTextures[carTex->Name] = std::move(carTex);
+}
+
 
 void ModelsGame::BuildRootSignature()
 {
+	CD3DX12_DESCRIPTOR_RANGE texTable;
+	texTable.Init(
+		D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 
+		1,  // number of descriptors
+		0); // register t0
 
     // Root parameter can be a table, root descriptor or root constants.
-    CD3DX12_ROOT_PARAMETER slotRootParameter[3];
+    CD3DX12_ROOT_PARAMETER slotRootParameter[4];
 
     // Create root CBVs.
-	slotRootParameter[0].InitAsConstantBufferView(0);
-	slotRootParameter[1].InitAsConstantBufferView(1);
-	slotRootParameter[2].InitAsConstantBufferView(2);
+	slotRootParameter[0].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
+    slotRootParameter[1].InitAsConstantBufferView(0);
+	slotRootParameter[2].InitAsConstantBufferView(1);
+	slotRootParameter[3].InitAsConstantBufferView(2);
+
+	auto staticSamplers = GetStaticSamplers();
 
     // A root signature is an array of root parameters.
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(3, slotRootParameter, 0, nullptr, 
+    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(4, slotRootParameter,
+    	(UINT)staticSamplers.size(), staticSamplers.data(), 
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
     // create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
@@ -344,6 +385,34 @@ void ModelsGame::BuildRootSignature()
         IID_PPV_ARGS(mRootSignature.GetAddressOf())));
 }
 
+void ModelsGame::BuildDescriptorHeaps()
+{
+	//
+	// Create the SRV heap.
+	//
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 3;
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&mSrvDescriptorHeap)));
+
+	//
+	// Fill out the heap with actual descriptors.
+	//
+	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	auto carTex = mTextures["carTex"]->Resource;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = carTex->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = carTex->GetDesc().MipLevels;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	md3dDevice->CreateShaderResourceView(carTex.Get(), &srvDesc, hDescriptor);
+}
+
 void ModelsGame::BuildShadersAndInputLayout()
 {
 	const D3D_SHADER_MACRO alphaTestDefines[] =
@@ -352,12 +421,13 @@ void ModelsGame::BuildShadersAndInputLayout()
 		NULL, NULL
 	};
 	
-    mShaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\light.hlsl", nullptr, "VS", "vs_5_1");
-    mShaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\light.hlsl", nullptr, "PS", "ps_5_1");
+    mShaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\light_texturing.hlsl", nullptr, "VS", "vs_5_1");
+    mShaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\light_texturing.hlsl", nullptr, "PS", "ps_5_1");
 	
     mInputLayout =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         // { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
@@ -370,8 +440,10 @@ void ModelsGame::BuildShapeGeometry()
 	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
 	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");
+	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\George.fbx");
 	// GeometryGenerator::MeshData box = geoGen.CreateSphere(0.5f, 20, 20);	
 	GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
+	// GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\George.fbx");
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
@@ -433,6 +505,7 @@ void ModelsGame::BuildShapeGeometry()
 	{
 		vertices[k].Pos = box.Vertices[i].Position;
 		vertices[k].Norm = box.Vertices[i].Normal;
+		vertices[k].TexC = box.Vertices[i].TexC;
         // vertices[k].Color = XMFLOAT4(DirectX::Colors::DarkGreen);
 	}
 
@@ -440,6 +513,7 @@ void ModelsGame::BuildShapeGeometry()
 	{
 		vertices[k].Pos = grid.Vertices[i].Position;
 		vertices[k].Norm = grid.Vertices[i].Normal;
+		vertices[k].TexC = grid.Vertices[i].TexC;
         // vertices[k].Color = XMFLOAT4(DirectX::Colors::ForestGreen);
 	}
 
@@ -447,6 +521,7 @@ void ModelsGame::BuildShapeGeometry()
 	{
 		vertices[k].Pos = sphere.Vertices[i].Position;
 		vertices[k].Norm = sphere.Vertices[i].Normal;
+		vertices[k].TexC = sphere.Vertices[i].TexC;
         // vertices[k].Color = XMFLOAT4(DirectX::Colors::Crimson);
 	}
 
@@ -454,6 +529,7 @@ void ModelsGame::BuildShapeGeometry()
 	{
 		vertices[k].Pos = cylinder.Vertices[i].Position;
 		vertices[k].Norm = cylinder.Vertices[i].Normal;
+		vertices[k].TexC = cylinder.Vertices[i].TexC;
 		// vertices[k].Color = XMFLOAT4(DirectX::Colors::SteelBlue);
 	}
 
@@ -550,8 +626,8 @@ void ModelsGame::BuildMaterials()
 	mat->Name = "Car";
 	mat->MatCBIndex = 0;
 	mat->DiffuseSrvHeapIndex = 0;
-	mat->DiffuseAlbedo = XMFLOAT4(Colors::OrangeRed);
-	mat->FresnelR0 = XMFLOAT3(1.0f, 0.71f, 0.29f);
+	mat->DiffuseAlbedo = XMFLOAT4(Colors::White);
+	mat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	mat->Roughness = 0.5f;
 
 	mMaterials["Car"] = std::move(mat);
@@ -646,6 +722,21 @@ void ModelsGame::BuildRenderItems()
 		mAllRitems.push_back(std::move(rightSphereRitem));
 	}
 
+	
+
+	auto sunRitem = std::make_unique<RenderItem>();
+	
+	XMStoreFloat4x4(&sunRitem->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*XMMatrixTranslation(0,0,0));
+	XMStoreFloat4x4(&sunRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
+	sunRitem->ObjCBIndex = objCBIndex;
+	sunRitem->Mat = mMaterials["Car"].get();
+	sunRitem->Geo = mGeometries["shapeGeo"].get();
+	sunRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	sunRitem->IndexCount = sunRitem->Geo->DrawArgs["sphere"].IndexCount;
+	sunRitem->StartIndexLocation = sunRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
+	sunRitem->BaseVertexLocation = sunRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
+	mAllRitems.push_back(std::move(sunRitem));
+
 	// All the render items are opaque.
 	for(auto& e : mAllRitems)
 		mRitemLayer[(int)RenderLayer::Opaque].push_back(e.get());
@@ -669,13 +760,74 @@ void ModelsGame::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::
 		cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());
 		cmdList->IASetPrimitiveTopology(ri->PrimitiveType);
 
+		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		tex.Offset(ri->Mat->DiffuseSrvHeapIndex, mCbvSrvDescriptorSize);
+		
 		D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress() + ri->ObjCBIndex*objCBByteSize;
 		D3D12_GPU_VIRTUAL_ADDRESS matCBAddress = matCB->GetGPUVirtualAddress() + ri->Mat->MatCBIndex*matCBByteSize;
 		
 
-		cmdList->SetGraphicsRootConstantBufferView(0, objCBAddress);
-		cmdList->SetGraphicsRootConstantBufferView(1, matCBAddress);
+		cmdList->SetGraphicsRootDescriptorTable(0, tex);
+		cmdList->SetGraphicsRootConstantBufferView(1, objCBAddress);
+		cmdList->SetGraphicsRootConstantBufferView(3, matCBAddress);
 
 		cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
 	}
+}
+
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> ModelsGame::GetStaticSamplers()
+{
+	// Applications usually only need a handful of samplers.  So just define them all up front
+	// and keep them available as part of the root signature.  
+
+	const CD3DX12_STATIC_SAMPLER_DESC pointWrap(
+		0, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP); // addressW
+
+	const CD3DX12_STATIC_SAMPLER_DESC pointClamp(
+		1, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP); // addressW
+
+	const CD3DX12_STATIC_SAMPLER_DESC linearWrap(
+		2, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP); // addressW
+
+	const CD3DX12_STATIC_SAMPLER_DESC linearClamp(
+		3, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP); // addressW
+
+	const CD3DX12_STATIC_SAMPLER_DESC anisotropicWrap(
+		4, // shaderRegister
+		D3D12_FILTER_ANISOTROPIC, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressW
+		0.0f,                             // mipLODBias
+		8);                               // maxAnisotropy
+
+	const CD3DX12_STATIC_SAMPLER_DESC anisotropicClamp(
+		5, // shaderRegister
+		D3D12_FILTER_ANISOTROPIC, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressW
+		0.0f,                              // mipLODBias
+		8);                                // maxAnisotropy
+
+	return { 
+		pointWrap, pointClamp,
+		linearWrap, linearClamp, 
+		anisotropicWrap, anisotropicClamp };
 }
