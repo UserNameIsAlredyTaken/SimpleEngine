@@ -21,7 +21,7 @@ bool BoxGame::Initialize()
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
  
 	BuildDescriptorHeaps();
-	BuildConstantBuffers();
+	// BuildConstantBuffers();
 	BuildRootSignature();
 	BuildShadersAndInputLayout();
 	BuildBoxGeometry();
