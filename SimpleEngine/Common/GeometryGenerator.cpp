@@ -28,7 +28,7 @@ GeometryGenerator::MeshData GeometryGenerator::LoadMesh(const char * fileLocatio
     
     FbxNode* rootNode = fbxScene->GetRootNode();
 
-	printf(fileLocation);
+	// printf(fileLocation);
 	// printf("\n");
 	
     if(rootNode)

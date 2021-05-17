@@ -55,8 +55,9 @@ private:
     void OnKeyboardInput(const GameTimer& gt);
     void UpdateSunPosition();
     void AnimateMaterials(const GameTimer& gt);
+    void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
-    void UpdateMaterialCBs(const GameTimer& gt);
+    // void UpdateMaterialCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
 
     void OnMouseDown(WPARAM btnState, int x, int y);
