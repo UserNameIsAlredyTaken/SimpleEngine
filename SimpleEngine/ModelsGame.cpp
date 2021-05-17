@@ -59,9 +59,6 @@ void ModelsGame::OnResize()
     Game::BaseOnResize();
 
 	mCamera.SetLens(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
-    // // The window resized, so update the aspect ratio and recompute the projection matrix.
-    // XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
-    // XMStoreFloat4x4(&mProj, P);
 }
 
 void ModelsGame::Update(const GameTimer& gt)
@@ -87,7 +84,6 @@ void ModelsGame::Update(const GameTimer& gt)
 	AnimateMaterials(gt);
     UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
-	// UpdateMaterialCBs(gt);
     UpdateMainPassCB(gt);
 }
 
@@ -535,7 +531,6 @@ void ModelsGame::BuildShapeGeometry()
 		vertices[k].Pos = box.Vertices[i].Position;
 		vertices[k].Norm = box.Vertices[i].Normal;
 		vertices[k].TexC = box.Vertices[i].TexC;
-        // vertices[k].Color = XMFLOAT4(DirectX::Colors::DarkGreen);
 	}
 
 	for(size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
@@ -543,7 +538,6 @@ void ModelsGame::BuildShapeGeometry()
 		vertices[k].Pos = grid.Vertices[i].Position;
 		vertices[k].Norm = grid.Vertices[i].Normal;
 		vertices[k].TexC = grid.Vertices[i].TexC;
-        // vertices[k].Color = XMFLOAT4(DirectX::Colors::ForestGreen);
 	}
 
 	for(size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
@@ -551,7 +545,6 @@ void ModelsGame::BuildShapeGeometry()
 		vertices[k].Pos = sphere.Vertices[i].Position;
 		vertices[k].Norm = sphere.Vertices[i].Normal;
 		vertices[k].TexC = sphere.Vertices[i].TexC;
-        // vertices[k].Color = XMFLOAT4(DirectX::Colors::Crimson);
 	}
 
 	for(size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
@@ -559,7 +552,6 @@ void ModelsGame::BuildShapeGeometry()
 		vertices[k].Pos = cylinder.Vertices[i].Position;
 		vertices[k].Norm = cylinder.Vertices[i].Normal;
 		vertices[k].TexC = cylinder.Vertices[i].TexC;
-		// vertices[k].Color = XMFLOAT4(DirectX::Colors::SteelBlue);
 	}
 
 	std::vector<std::uint16_t> indices;
@@ -680,7 +672,6 @@ void ModelsGame::BuildRenderItems()
 	mAllRitems.push_back(std::move(carRitem));
 
     auto gridRitem = std::make_unique<RenderItem>();
-    // gridRitem->World = MathHelper::Identity4x4();
 	XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, -10.0f, 0.0f));
 	XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
 	gridRitem->ObjCBIndex = 1;

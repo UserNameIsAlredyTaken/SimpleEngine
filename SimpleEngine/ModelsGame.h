@@ -33,6 +33,7 @@ struct RenderItem
 enum class RenderLayer : int
 {
     Opaque = 0,
+    Debug,
     Count
 };
 
@@ -57,7 +58,6 @@ private:
     void AnimateMaterials(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
-    // void UpdateMaterialCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
 
     void OnMouseDown(WPARAM btnState, int x, int y);
@@ -100,7 +100,6 @@ private:
     std::vector<std::unique_ptr<RenderItem>> mAllRitems;
 
     // Render items divided by PSO.
-    // std::vector<RenderItem*> mOpaqueRitems;
     std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
 
     PassConstants mMainPassCB;
