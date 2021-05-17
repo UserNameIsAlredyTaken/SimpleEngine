@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Camera.h"
 #include "FrameResource.h"
 #include "Game.h"
 #include "Common/UploadBuffer.h"
@@ -52,7 +53,6 @@ private:
     void OnResize();
 
     void OnKeyboardInput(const GameTimer& gt);
-    void UpdateCamera(const GameTimer& gt);
     void UpdateSunPosition();
     void AnimateMaterials(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
@@ -104,15 +104,9 @@ private:
 
     PassConstants mMainPassCB;
 
+    Camera mCamera;
+
     UINT mPassCbvOffset = 0;
-
-    XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
-    XMFLOAT4X4 mView = MathHelper::Identity4x4();
-    XMFLOAT4X4 mProj = MathHelper::Identity4x4();
-
-    float mTheta = 1.5f * XM_PI;
-    float mPhi = XM_PIDIV2;
-    float mRadius = 5.0f;
 
     float lightTheta = 1.25f*XM_PI;;
     float lightPhi = XM_PIDIV2;

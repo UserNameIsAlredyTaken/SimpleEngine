@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BoxGame.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CircleWindow.cpp" />
     <ClCompile Include="Common\d3dUtil.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
@@ -365,6 +366,7 @@
   <ItemGroup>
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="BoxGame.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="CircleWindow.h" />
     <ClInclude Include="Common\d3dUtil.h" />
     <ClInclude Include="Common\d3dx12.h" />

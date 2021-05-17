@@ -24,6 +24,8 @@ bool ModelsGame::Initialize()
     // Reset the command list to prep for initialization commands.
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
+	mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+
 	mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	
 	LoadTextures();
@@ -56,15 +58,15 @@ void ModelsGame::OnResize()
 {
     Game::BaseOnResize();
 
-    // The window resized, so update the aspect ratio and recompute the projection matrix.
-    XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
-    XMStoreFloat4x4(&mProj, P);
+	mCamera.SetLens(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
+    // // The window resized, so update the aspect ratio and recompute the projection matrix.
+    // XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
+    // XMStoreFloat4x4(&mProj, P);
 }
 
 void ModelsGame::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
-    UpdateCamera(gt);
 	UpdateSunPosition();
 	
 
@@ -168,24 +170,9 @@ void ModelsGame::OnMouseMove(WPARAM btnState, int x, int y)
         float dx = XMConvertToRadians(0.25f*static_cast<float>(x - mLastMousePos.x));
         float dy = XMConvertToRadians(0.25f*static_cast<float>(y - mLastMousePos.y));
 
-        // Update angles based on input to orbit camera around box.
-        mTheta += dx;
-        mPhi += dy;
 
-        // Restrict the angle mPhi.
-        mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
-    }
-    else if((btnState & MK_RBUTTON) != 0)
-    {
-        // Make each pixel correspond to 0.2 unit in the scene.
-        float dx = 0.05f*static_cast<float>(x - mLastMousePos.x);
-        float dy = 0.05f*static_cast<float>(y - mLastMousePos.y);
-
-        // Update the camera radius based on input.
-        mRadius += dx - dy;
-
-        // Restrict the radius.
-        mRadius = MathHelper::Clamp(mRadius, 3.0f, 150.0f);
+    	mCamera.Pitch(dy);
+    	mCamera.RotateY(dx);
     }
 
     mLastMousePos.x = x;
@@ -196,6 +183,7 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 {
 	const float dt = gt.DeltaTime();
 
+	//controll light
 	if(GetAsyncKeyState(VK_LEFT) & 0x8000)
 		lightTheta -= lightRotationSpeed*dt;
 
@@ -208,24 +196,27 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	if(GetAsyncKeyState(VK_DOWN) & 0x8000)
 		lightPhi += lightRotationSpeed*dt;
 
-	lightPhi = MathHelper::Clamp(lightPhi, 0.1f, XM_PIDIV2);
-	// printf("%f,%f\n", lightPhi, lightTheta);
-}
 
-void ModelsGame::UpdateCamera(const GameTimer& gt)
-{
-    // Convert Spherical to Cartesian coordinates.
-    mEyePos.x = mRadius*sinf(mPhi)*cosf(mTheta);
-    mEyePos.z = mRadius*sinf(mPhi)*sinf(mTheta);
-    mEyePos.y = mRadius*cosf(mPhi);
+	//controll camera
+	if(GetAsyncKeyState('W') & 0x8000)
+		mCamera.Walk(10.0f*dt);
 
-    // Build the view matrix.
-    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
-    XMVECTOR target = XMVectorZero();
-    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	if(GetAsyncKeyState('S') & 0x8000)
+		mCamera.Walk(-10.0f*dt);
 
-    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-    XMStoreFloat4x4(&mView, view);
+	if(GetAsyncKeyState('A') & 0x8000)
+		mCamera.Strafe(-10.0f*dt);
+
+	if(GetAsyncKeyState('D') & 0x8000)
+		mCamera.Strafe(10.0f*dt);
+
+	if(GetAsyncKeyState('Q') & 0x8000)
+		mCamera.Lift(-10.0f*dt);
+
+	if(GetAsyncKeyState('E') & 0x8000)
+		mCamera.Lift(10.0f*dt);
+
+	mCamera.UpdateViewMatrix();
 }
 
 void ModelsGame::UpdateSunPosition()
@@ -295,8 +286,8 @@ void ModelsGame::UpdateMaterialCBs(const GameTimer& gt)
 
 void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
 {
-    XMMATRIX view = XMLoadFloat4x4(&mView);
-    XMMATRIX proj = XMLoadFloat4x4(&mProj);
+	XMMATRIX view = mCamera.GetView();
+	XMMATRIX proj = mCamera.GetProj();
 
     XMMATRIX viewProj = XMMatrixMultiply(view, proj);
     XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
@@ -309,7 +300,7 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
     XMStoreFloat4x4(&mMainPassCB.InvProj, XMMatrixTranspose(invProj));
     XMStoreFloat4x4(&mMainPassCB.ViewProj, XMMatrixTranspose(viewProj));
     XMStoreFloat4x4(&mMainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
-    mMainPassCB.EyePosW = mEyePos;
+	mMainPassCB.EyePosW = mCamera.GetPosition3f();
     mMainPassCB.RenderTargetSize = XMFLOAT2((float)mClientWidth, (float)mClientHeight);
     mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / mClientWidth, 1.0f / mClientHeight);
     mMainPassCB.NearZ = 1.0f;
@@ -321,7 +312,6 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
 	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(1.0f, lightTheta, lightPhi);
 
 	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
-	// mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
 	mMainPassCB.Lights[0].Strength = { 0.2f, 0.4f, 0.2f };
 
     auto currPassCB = mCurrFrameResource->PassCB.get();
