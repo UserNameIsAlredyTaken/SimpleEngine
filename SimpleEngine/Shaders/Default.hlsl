@@ -29,7 +29,8 @@ struct VertexIn
 struct VertexOut
 {
     float4 PosH : SV_POSITION;
-    float3 PosW : POSITION;
+    float4 ShadowPosH : POSITION0;
+    float3 PosW : POSITION1;
     float3 NormalW : NORMAL;
     float2 TexC : TEXCOORD;
 };
@@ -54,6 +55,9 @@ VertexOut VS(VertexIn vin)
 	// Output vertex attributes for interpolation across triangle.
     float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), gTexTransform);
     vout.TexC = mul(texC, matData.MatTransform).xy;
+    
+    // Generate projective tex-coords to project shadow map onto scene.
+    vout.ShadowPosH = mul(posW, gShadowTransform);
 	
     return vout;
 }
@@ -78,9 +82,12 @@ float4 PS(VertexOut pin) : SV_Target
     // Light terms.
     float4 ambient = gAmbientLight * diffuseAlbedo;
 
+    // Only the first light casts a shadow.
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor[0] = CalcShadowFactor(pin.ShadowPosH);
+    
     const float shininess = 1.0f - roughness;
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
-    float3 shadowFactor = 1.0f;
     float4 directLight = ComputeLighting(gLights, mat, pin.PosW,
         pin.NormalW, toEyeW, shadowFactor);
 

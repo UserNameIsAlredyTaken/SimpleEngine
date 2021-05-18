@@ -168,8 +168,11 @@ void ModelsGame::Draw(const GameTimer& gt)
 	mCommandList->SetPipelineState(mPSOs["opaque"].Get());
 	DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);
 
-	mCommandList->SetPipelineState(mPSOs["debug"].Get());
-	DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Debug]);
+	if(showDebug)
+	{
+		mCommandList->SetPipelineState(mPSOs["debug"].Get());
+		DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Debug]);
+	}	
 
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -260,6 +263,13 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	if(GetAsyncKeyState('E') & 0x8000)
 		mCamera.Lift(10.0f*dt);
 
+
+	if((GetAsyncKeyState('1') & 0x8000) &&
+		!debugKeyPrevStateIsDown)
+		showDebug = !showDebug;
+
+	debugKeyPrevStateIsDown = GetAsyncKeyState('1') & 0x8000;
+
 	mCamera.UpdateViewMatrix();
 }
 
@@ -346,12 +356,15 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
     XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
     XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
 
+	XMMATRIX shadowTransform = XMLoadFloat4x4(&mShadowTransform);
+
     XMStoreFloat4x4(&mMainPassCB.View, XMMatrixTranspose(view));
     XMStoreFloat4x4(&mMainPassCB.InvView, XMMatrixTranspose(invView));
     XMStoreFloat4x4(&mMainPassCB.Proj, XMMatrixTranspose(proj));
     XMStoreFloat4x4(&mMainPassCB.InvProj, XMMatrixTranspose(invProj));
     XMStoreFloat4x4(&mMainPassCB.ViewProj, XMMatrixTranspose(viewProj));
     XMStoreFloat4x4(&mMainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+	XMStoreFloat4x4(&mMainPassCB.ShadowTransform, XMMatrixTranspose(shadowTransform));
 	mMainPassCB.EyePosW = mCamera.GetPosition3f();
     mMainPassCB.RenderTargetSize = XMFLOAT2((float)mClientWidth, (float)mClientHeight);
     mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / mClientWidth, 1.0f / mClientHeight);
@@ -939,7 +952,7 @@ void ModelsGame::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::
 	}
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> ModelsGame::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> ModelsGame::GetStaticSamplers()
 {
 	// Applications usually only need a handful of samplers.  So just define them all up front
 	// and keep them available as part of the root signature.  
@@ -990,10 +1003,23 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> ModelsGame::GetStaticSamplers()
 		0.0f,                              // mipLODBias
 		8);                                // maxAnisotropy
 
+	const CD3DX12_STATIC_SAMPLER_DESC shadow(
+		6, // shaderRegister
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressW
+		0.0f,                               // mipLODBias
+		16,                                 // maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
+
 	return { 
 		pointWrap, pointClamp,
 		linearWrap, linearClamp, 
-		anisotropicWrap, anisotropicClamp };
+		anisotropicWrap, anisotropicClamp,
+		shadow
+	};
 }
 
 void ModelsGame::UpdateShadowPassCB(const GameTimer& gt)

@@ -80,7 +80,7 @@ private:
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
     void DrawSceneToShadowMap();
 
-    std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+    std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 
     std::vector<std::unique_ptr<FrameResource>> mFrameResources;
     FrameResource* mCurrFrameResource = nullptr;
@@ -136,6 +136,9 @@ private:
     float lightRotationSpeed = 3.0f;
 
     POINT mLastMousePos;
+
+    bool debugKeyPrevStateIsDown = false;
+    bool showDebug = false;
 };
 
 
