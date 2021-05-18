@@ -8,6 +8,12 @@ ModelsGame::ModelsGame(HINSTANCE hInstance)
     : Game(hInstance)
 {
     mMainWndCaption = L"ModelsGame";
+	// Estimate the scene bounding sphere manually since we know how the scene was constructed.
+	// The grid is the "widest object" with a width of 20 and depth of 30.0f, and centered at
+	// the world space origin.  In general, you need to loop over every world space vertex
+	// position and compute the bounding sphere.
+	mSceneBounds.Center = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	mSceneBounds.Radius = sqrtf(10.0f*10.0f + 15.0f*15.0f);
 }
 
 ModelsGame::~ModelsGame()
@@ -25,6 +31,9 @@ bool ModelsGame::Initialize()
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
 	mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+
+	mShadowMap = std::make_unique<ShadowMap>(
+		md3dDevice.Get(), 2048, 2048);
 
 	mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	
@@ -52,6 +61,26 @@ bool ModelsGame::Initialize()
 LRESULT ModelsGame::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     return Game::BaseMsgProc(hwnd, msg, wParam, lParam);
+}
+
+void ModelsGame::CreateRtvAndDsvDescriptorHeaps()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
+	rtvHeapDesc.NumDescriptors = SwapChainBufferCount;
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	rtvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(
+		&rtvHeapDesc, IID_PPV_ARGS(mRtvHeap.GetAddressOf())));
+
+	// Add +1 DSV for shadow map.
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
+	dsvHeapDesc.NumDescriptors = 2;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	dsvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(
+		&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
 
 void ModelsGame::OnResize()
@@ -84,7 +113,9 @@ void ModelsGame::Update(const GameTimer& gt)
 	AnimateMaterials(gt);
     UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
+	UpdateShadowTransform(gt);
     UpdateMainPassCB(gt);
+	UpdateShadowPassCB(gt);
 }
 
 void ModelsGame::Draw(const GameTimer& gt)
@@ -96,6 +127,25 @@ void ModelsGame::Draw(const GameTimer& gt)
     ThrowIfFailed(cmdListAlloc->Reset());
     
     ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), mPSOs["opaque"].Get()));
+	
+	ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
+	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	
+	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+
+	// Bind all the materials used in this scene.  For structured buffers, we can bypass the heap and 
+	// set as a root descriptor.
+	auto matBuffer = mCurrFrameResource->MaterialBuffer->Resource();
+	mCommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
+
+	// Bind all the textures used in this scene.  Observe
+	// that we only have to specify the first descriptor in the table.  
+	// The root signature knows how many descriptors are expected in the table.
+	mCommandList->SetGraphicsRootDescriptorTable(3, mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	// Bind null SRV for shadow map pass.
+	mCommandList->SetGraphicsRootDescriptorTable(4, mShadowSrv);
+
+	DrawSceneToShadowMap();
 
 	mCommandList->RSSetViewports(1, &mScreenViewport);
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
@@ -111,24 +161,9 @@ void ModelsGame::Draw(const GameTimer& gt)
 	// Specify the buffers we are going to render to.
 	mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 	
-	ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
-	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	
-	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
-
 	// Bind per-pass constant buffer.  We only need to do this once per-pass.
 	auto passCB = mCurrFrameResource->PassCB->Resource();
 	mCommandList->SetGraphicsRootConstantBufferView(1, passCB->GetGPUVirtualAddress());
-
-	// Bind all the materials used in this scene.  For structured buffers, we can bypass the heap and 
-	// set as a root descriptor.
-	auto matBuffer = mCurrFrameResource->MaterialBuffer->Resource();
-	mCommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
-    
-	// Bind all the textures used in this scene.  Observe
-	// that we only have to specify the first descriptor in the table.  
-	// The root signature knows how many descriptors are expected in the table.
-	mCommandList->SetGraphicsRootDescriptorTable(3, mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 	mCommandList->SetPipelineState(mPSOs["opaque"].Get());
 	DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);
@@ -365,24 +400,30 @@ void ModelsGame::LoadTextures()
 
 void ModelsGame::BuildRootSignature()
 {
+	CD3DX12_DESCRIPTOR_RANGE shadowMapTable;
+	shadowMapTable.Init(
+		D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 
+		1,  // number of descriptors
+		0, 0); // register t0
 	CD3DX12_DESCRIPTOR_RANGE texTable;
 	texTable.Init(
 		D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 
 		2,  // number of descriptors
-		0, 0); // register t0
+		1, 0); // register t0
 
     // Root parameter can be a table, root descriptor or root constants.
-    CD3DX12_ROOT_PARAMETER slotRootParameter[4];  
+    CD3DX12_ROOT_PARAMETER slotRootParameter[5];  
 	
-    slotRootParameter[0].InitAsConstantBufferView(0);
-	slotRootParameter[1].InitAsConstantBufferView(1);
-	slotRootParameter[2].InitAsShaderResourceView(0, 1);
-	slotRootParameter[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
+    slotRootParameter[0].InitAsConstantBufferView(0); //cbPerObject
+	slotRootParameter[1].InitAsConstantBufferView(1); //cbPass
+	slotRootParameter[2].InitAsShaderResourceView(0, 1); //gMaterialData
+	slotRootParameter[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL); //gDiffuseMap
+	slotRootParameter[4].InitAsDescriptorTable(1, &shadowMapTable, D3D12_SHADER_VISIBILITY_PIXEL); //gShadowMap
 
 	auto staticSamplers = GetStaticSamplers();
 
     // A root signature is an array of root parameters.
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(4, slotRootParameter,
+    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(5, slotRootParameter,
     	(UINT)staticSamplers.size(), staticSamplers.data(), 
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -421,24 +462,49 @@ void ModelsGame::BuildDescriptorHeaps()
 	//
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-	auto carTex = mTextures["carDiffuseMap"]->Resource;
-	auto envTex = mTextures["environmentDiffuseMap"]->Resource;
+
+	std::vector<ComPtr<ID3D12Resource>> tex2DList = 
+	{
+		mTextures["carDiffuseMap"]->Resource,
+		mTextures["environmentDiffuseMap"]->Resource
+	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = carTex->GetDesc().Format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;	
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;	
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;	
+
+	for(UINT i = 0; i < (UINT)tex2DList.size(); ++i)
+	{
+		srvDesc.Format = tex2DList[i]->GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = tex2DList[i]->GetDesc().MipLevels;
+		md3dDevice->CreateShaderResourceView(tex2DList[i].Get(), &srvDesc, hDescriptor);
+		
+		// next descriptor
+		hDescriptor.Offset(1, mCbvSrvDescriptorSize);
+	}
+
+	mShadowMapHeapIndex = (UINT)tex2DList.size();
+
+	auto srvCpuStart = mSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	auto srvGpuStart = mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	auto dsvCpuStart = mDsvHeap->GetCPUDescriptorHandleForHeapStart();
+
+	auto ShadowSrv = CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, mShadowMapHeapIndex, mCbvSrvUavDescriptorSize);
+	mShadowSrv = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, mShadowMapHeapIndex, mCbvSrvUavDescriptorSize);
+
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = carTex->GetDesc().MipLevels;
+	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	md3dDevice->CreateShaderResourceView(carTex.Get(), &srvDesc, hDescriptor);
+	md3dDevice->CreateShaderResourceView(nullptr, &srvDesc, ShadowSrv);
 
-	// next descriptor
-	hDescriptor.Offset(1, mCbvSrvDescriptorSize);
-
-	srvDesc.Format = envTex->GetDesc().Format;
-	srvDesc.Texture2D.MipLevels = envTex->GetDesc().MipLevels;
-	md3dDevice->CreateShaderResourceView(envTex.Get(), &srvDesc, hDescriptor);
+	mShadowMap->BuildDescriptors(
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, mShadowMapHeapIndex, mCbvSrvUavDescriptorSize),
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, mShadowMapHeapIndex, mCbvSrvUavDescriptorSize),
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, mDsvDescriptorSize));
 }
 
 void ModelsGame::BuildShadersAndInputLayout()
@@ -451,6 +517,9 @@ void ModelsGame::BuildShadersAndInputLayout()
 	
     mShaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
     mShaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_1");
+
+	mShaders["shadowVS"] = d3dUtil::CompileShader(L"Shaders\\Shadows.hlsl", nullptr, "VS", "vs_5_1");
+	mShaders["shadowOpaquePS"] = d3dUtil::CompileShader(L"Shaders\\Shadows.hlsl", nullptr, "PS", "ps_5_1");
 
 	mShaders["debugVS"] = d3dUtil::CompileShader(L"Shaders\\ShadowDebug.hlsl", nullptr, "VS", "vs_5_1");
 	mShaders["debugPS"] = d3dUtil::CompileShader(L"Shaders\\ShadowDebug.hlsl", nullptr, "PS", "ps_5_1");
@@ -476,7 +545,7 @@ void ModelsGame::BuildShapeGeometry()
 	// GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\George.fbx");
 	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
-	GeometryGenerator::MeshData quad = geoGen.CreateQuad(0.3f, 1.0f, 1.0f, 0.7f, 0.0f);
+	GeometryGenerator::MeshData quad = geoGen.CreateQuad(0.0f, 1.0f, 1.0f, 1.0f, 0.0f);
 
 	//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So
@@ -647,6 +716,30 @@ void ModelsGame::BuildPSOs()
 	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
 
 	//
+	// PSO for shadow map pass.
+	//
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC smapPsoDesc = opaquePsoDesc;
+	smapPsoDesc.RasterizerState.DepthBias = 100000;
+	smapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;
+	smapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+	smapPsoDesc.pRootSignature = mRootSignature.Get();
+	smapPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(mShaders["shadowVS"]->GetBufferPointer()),
+		mShaders["shadowVS"]->GetBufferSize()
+	};
+	smapPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(mShaders["shadowOpaquePS"]->GetBufferPointer()),
+		mShaders["shadowOpaquePS"]->GetBufferSize()
+	};
+    
+	// Shadow map pass does not have a render target.
+	smapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	smapPsoDesc.NumRenderTargets = 0;
+	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&mPSOs["shadow_opaque"])));
+	
+	//
 	// PSO for debug layer.
 	//
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC debugPsoDesc = opaquePsoDesc;
@@ -669,7 +762,7 @@ void ModelsGame::BuildFrameResources()
 	for(int i = 0; i < gNumFrameResources; ++i)
 	{
 		mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(),
-			1, (UINT)mAllRitems.size(), (UINT)mMaterials.size()));
+			2, (UINT)mAllRitems.size(), (UINT)mMaterials.size()));
 	}
 }
 
@@ -726,7 +819,8 @@ void ModelsGame::BuildRenderItems()
 	mAllRitems.push_back(std::move(carRitem));
 
     auto gridRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, -10.0f, 0.0f));
+	gridRitem->World = MathHelper::Identity4x4();
+	// XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, -10.0f, 0.0f));
 	XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
 	gridRitem->ObjCBIndex = 1;
 	gridRitem->Mat = mMaterials["Env"].get();
@@ -900,4 +994,107 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> ModelsGame::GetStaticSamplers()
 		pointWrap, pointClamp,
 		linearWrap, linearClamp, 
 		anisotropicWrap, anisotropicClamp };
+}
+
+void ModelsGame::UpdateShadowPassCB(const GameTimer& gt)
+{
+	XMMATRIX view = XMLoadFloat4x4(&mLightView);
+	XMMATRIX proj = XMLoadFloat4x4(&mLightProj);
+
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
+	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
+
+	UINT w = mShadowMap->Width();
+	UINT h = mShadowMap->Height();
+
+	XMStoreFloat4x4(&mShadowPassCB.View, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&mShadowPassCB.InvView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&mShadowPassCB.Proj, XMMatrixTranspose(proj));
+	XMStoreFloat4x4(&mShadowPassCB.InvProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&mShadowPassCB.ViewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&mShadowPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+	mShadowPassCB.EyePosW = mLightPosW;
+	mShadowPassCB.RenderTargetSize = XMFLOAT2((float)w, (float)h);
+	mShadowPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / w, 1.0f / h);
+	mShadowPassCB.NearZ = mLightNearZ;
+	mShadowPassCB.FarZ = mLightFarZ;
+
+	auto currPassCB = mCurrFrameResource->PassCB.get();
+	currPassCB->CopyData(1, mShadowPassCB);
+}
+
+void ModelsGame::UpdateShadowTransform(const GameTimer& gt)
+{
+	// Only the first "main" light casts a shadow.
+	XMVECTOR lightDir = XMLoadFloat3(&mMainPassCB.Lights[0].Direction);
+	XMVECTOR lightPos = -2.0f*mSceneBounds.Radius*lightDir;
+	XMVECTOR targetPos = XMLoadFloat3(&mSceneBounds.Center);
+	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
+
+	XMStoreFloat3(&mLightPosW, lightPos);
+
+	// Transform bounding sphere to light space.
+	XMFLOAT3 sphereCenterLS;
+	XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, lightView));
+
+	// Ortho frustum in light space encloses scene.
+	float l = sphereCenterLS.x - mSceneBounds.Radius;
+	float b = sphereCenterLS.y - mSceneBounds.Radius;
+	float n = sphereCenterLS.z - mSceneBounds.Radius;
+	float r = sphereCenterLS.x + mSceneBounds.Radius;
+	float t = sphereCenterLS.y + mSceneBounds.Radius;
+	float f = sphereCenterLS.z + mSceneBounds.Radius;
+
+	mLightNearZ = n;
+	mLightFarZ = f;
+	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+	XMMATRIX T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMMATRIX S = lightView*lightProj*T;
+	XMStoreFloat4x4(&mLightView, lightView);
+	XMStoreFloat4x4(&mLightProj, lightProj);
+	XMStoreFloat4x4(&mShadowTransform, S);
+}
+
+void ModelsGame::DrawSceneToShadowMap()
+{
+	mCommandList->RSSetViewports(1, &mShadowMap->Viewport());
+	mCommandList->RSSetScissorRects(1, &mShadowMap->ScissorRect());
+
+	// Change to DEPTH_WRITE.
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	UINT passCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
+
+	// Clear the back buffer and depth buffer.
+	mCommandList->ClearDepthStencilView(mShadowMap->Dsv(), 
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// Set null render target because we are only going to draw to
+	// depth buffer.  Setting a null render target will disable color writes.
+	// Note the active PSO also must specify a render target count of 0.
+	mCommandList->OMSetRenderTargets(0, nullptr, false, &mShadowMap->Dsv());
+
+	// Bind the pass constant buffer for the shadow map pass.
+	auto passCB = mCurrFrameResource->PassCB->Resource();
+	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + 1*passCBByteSize;
+	mCommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
+
+	mCommandList->SetPipelineState(mPSOs["shadow_opaque"].Get());
+
+	DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);
+
+	// Change back to GENERIC_READ so we can read the texture in a shader.
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 }

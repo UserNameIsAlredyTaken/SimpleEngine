@@ -123,7 +123,7 @@ protected:
 	int mClientWidth = 800;
 	int mClientHeight = 600;
 
-	void CreateRtvAndDsvDescriptorHeaps();
+	virtual void CreateRtvAndDsvDescriptorHeaps();
 	void BaseOnResize();
 	
 	// Convenience overrides for handling mouse input.

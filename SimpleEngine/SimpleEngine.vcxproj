@@ -360,6 +360,7 @@
     <ClCompile Include="ModelsGame.cpp" />
     <ClCompile Include="NewModelsGame.cpp" />
     <ClCompile Include="RedrawGame.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="TestRedCircleWindow.cpp" />
     <ClCompile Include="WindowStyle.cpp" />
   </ItemGroup>
@@ -380,6 +381,7 @@
     <ClInclude Include="ModelsGame.h" />
     <ClInclude Include="NewModelsGame.h" />
     <ClInclude Include="RedrawGame.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="TestRedCircleWindow.h" />
     <ClInclude Include="WindowStyle.h" />
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "FrameResource.h"
 #include "Game.h"
+#include "ShadowMap.h"
 #include "Common/UploadBuffer.h"
 
 using Microsoft::WRL::ComPtr;
@@ -52,13 +53,16 @@ private:
     void Update(const GameTimer& gt);
     void Draw(const GameTimer& gt);
     void OnResize();
+    virtual void CreateRtvAndDsvDescriptorHeaps()override;
 
     void OnKeyboardInput(const GameTimer& gt);
     void UpdateSunPosition();
     void AnimateMaterials(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
+    void UpdateShadowTransform(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
+    void UpdateShadowPassCB(const GameTimer& gt);
 
     void OnMouseDown(WPARAM btnState, int x, int y);
     void OnMouseUp(WPARAM btnState, int x, int y);
@@ -74,6 +78,7 @@ private:
     void BuildMaterials();
     void BuildRenderItems();
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
+    void DrawSceneToShadowMap();
 
     std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 
@@ -102,9 +107,26 @@ private:
     // Render items divided by PSO.
     std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
 
-    PassConstants mMainPassCB;
+    UINT mShadowMapHeapIndex = 0;
+    UINT mShadowSrvIndex = 0;
+
+    CD3DX12_GPU_DESCRIPTOR_HANDLE mShadowSrv;
+    
+    PassConstants mMainPassCB;   // index 0 of pass cbuffer.
+    PassConstants mShadowPassCB; // index 1 of pass cbuffer.
 
     Camera mCamera;
+
+    std::unique_ptr<ShadowMap> mShadowMap;
+
+    DirectX::BoundingSphere mSceneBounds;
+
+    float mLightNearZ = 0.0f;
+    float mLightFarZ = 0.0f;
+    XMFLOAT3 mLightPosW;
+    XMFLOAT4X4 mLightView = MathHelper::Identity4x4();
+    XMFLOAT4X4 mLightProj = MathHelper::Identity4x4();
+    XMFLOAT4X4 mShadowTransform = MathHelper::Identity4x4();
 
     UINT mPassCbvOffset = 0;
 
@@ -115,5 +137,9 @@ private:
 
     POINT mLastMousePos;
 };
+
+
+
+
 
 
