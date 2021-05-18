@@ -56,7 +56,7 @@ private:
     virtual void CreateRtvAndDsvDescriptorHeaps()override;
 
     void OnKeyboardInput(const GameTimer& gt);
-    void UpdateSunPosition();
+    void UpdateSunModelPosition();
     void AnimateMaterials(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateShadowTransform(const GameTimer& gt);
@@ -132,6 +132,7 @@ private:
 
     float lightTheta = 1.25f*XM_PI;;
     float lightPhi = XM_PIDIV2;
+    float lightDistance = 2.0f;
 
     float lightRotationSpeed = 3.0f;
 

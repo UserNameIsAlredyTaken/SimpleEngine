@@ -34,6 +34,8 @@ bool ModelsGame::Initialize()
 
 	mShadowMap = std::make_unique<ShadowMap>(
 		md3dDevice.Get(), 2048, 2048);
+	// md3dDevice.Get(), 4096, 4096);
+	// md3dDevice.Get(), 8192, 8192);
 
 	mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	
@@ -93,7 +95,7 @@ void ModelsGame::OnResize()
 void ModelsGame::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
-	UpdateSunPosition();
+	UpdateSunModelPosition();
 	
 
     // Cycle through the circular frame resource array.
@@ -113,8 +115,8 @@ void ModelsGame::Update(const GameTimer& gt)
 	AnimateMaterials(gt);
     UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
-	UpdateShadowTransform(gt);
     UpdateMainPassCB(gt);
+	UpdateShadowTransform(gt);
 	UpdateShadowPassCB(gt);
 }
 
@@ -243,6 +245,12 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	if(GetAsyncKeyState(VK_DOWN) & 0x8000)
 		lightPhi += lightRotationSpeed*dt;
 
+	if(GetAsyncKeyState(VK_OEM_PLUS) & 0x8000)
+		lightDistance += lightRotationSpeed*dt;
+
+	if(GetAsyncKeyState(VK_OEM_MINUS) & 0x8000)
+		lightDistance -= lightRotationSpeed*dt;
+
 
 	//controll camera
 	if(GetAsyncKeyState('W') & 0x8000)
@@ -263,22 +271,26 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	if(GetAsyncKeyState('E') & 0x8000)
 		mCamera.Lift(10.0f*dt);
 
+	mCamera.UpdateViewMatrix();
 
+	//flipflop debug
 	if((GetAsyncKeyState('1') & 0x8000) &&
 		!debugKeyPrevStateIsDown)
 		showDebug = !showDebug;
 
 	debugKeyPrevStateIsDown = GetAsyncKeyState('1') & 0x8000;
-
-	mCamera.UpdateViewMatrix();
 }
 
-void ModelsGame::UpdateSunPosition()
+void ModelsGame::UpdateSunModelPosition()
 {
+	// XMMATRIX translation = XMMatrixTranslation(
+	// 		-mMainPassCB.Lights[0].Direction.x * 5,
+	// 			-mMainPassCB.Lights[0].Direction.y * 5,
+	// 			-mMainPassCB.Lights[0].Direction.z * 5);
 	XMMATRIX translation = XMMatrixTranslation(
-			-mMainPassCB.Lights[0].Direction.x * 5,
-				-mMainPassCB.Lights[0].Direction.y * 5,
-				-mMainPassCB.Lights[0].Direction.z * 5);
+			-mMainPassCB.Lights[0].Direction.x * lightDistance,
+				-mMainPassCB.Lights[0].Direction.y * lightDistance,
+				-mMainPassCB.Lights[0].Direction.z * lightDistance);
 
 	RenderItem* sun = mRitemLayer[(int)RenderLayer::Opaque][mRitemLayer[(int)RenderLayer::Opaque].size() - 1];
 	XMStoreFloat4x4(&sun->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*translation);
@@ -374,10 +386,15 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
     mMainPassCB.DeltaTime = gt.DeltaTime();
 	
 	mMainPassCB.AmbientLight = { 0.3f, 0.3f, 0.3f, 1.0f };
-	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(1.0f, lightTheta, lightPhi);
+	XMVECTOR lightDir = -MathHelper::SphericalToCartesian(1, lightTheta, lightPhi);
 
 	XMStoreFloat3(&mMainPassCB.Lights[0].Direction, lightDir);
-	mMainPassCB.Lights[0].Strength = { 0.2f, 0.4f, 0.2f };
+	mMainPassCB.Lights[0].Strength = { 0.4f, 0.8f, 0.4f };
+	mMainPassCB.Lights[0].Position = {
+		-mMainPassCB.Lights[0].Direction.x * lightDistance,
+		-mMainPassCB.Lights[0].Direction.y * lightDistance,
+		-mMainPassCB.Lights[0].Direction.z * lightDistance
+	};
 
     auto currPassCB = mCurrFrameResource->PassCB.get();
     currPassCB->CopyData(0, mMainPassCB);
@@ -1055,7 +1072,8 @@ void ModelsGame::UpdateShadowTransform(const GameTimer& gt)
 {
 	// Only the first "main" light casts a shadow.
 	XMVECTOR lightDir = XMLoadFloat3(&mMainPassCB.Lights[0].Direction);
-	XMVECTOR lightPos = -2.0f*mSceneBounds.Radius*lightDir;
+	// XMVECTOR lightPos = -lightDistance*mSceneBounds.Radius*lightDir;
+	XMVECTOR lightPos = XMLoadFloat3(&mMainPassCB.Lights[0].Position);
 	XMVECTOR targetPos = XMLoadFloat3(&mSceneBounds.Center);
 	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
