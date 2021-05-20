@@ -3,6 +3,7 @@
 
 #include "FrameResource.h"
 #include "Game.h"
+#include "Transform.h"
 #include "Components/BaseComponent.h"
 #include "Components/MoveComponent.h"
 
@@ -31,15 +32,6 @@ struct RenderItem
     int BaseVertexLocation = 0;
 };
 
-struct Transform
-{
-    DirectX::XMFLOAT3 Position;
-    DirectX::XMFLOAT3 Rotation;
-    DirectX::XMFLOAT3 Scale;
-
-    Transform(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scale);
-    XMFLOAT4X4 GetGlobalWorldMatrix();
-};
 
 class GameObject
 {
@@ -50,6 +42,7 @@ public:
     void Update(const GameTimer& gt);
     void AddChild(GameObject* child);
     void AddComponent(std::shared_ptr<BaseComponent> component);
+    void RefreshWorldMatrix();
 
     Transform LocalTransform; //always relative to parent's
     std::shared_ptr<RenderItem> Ritem;

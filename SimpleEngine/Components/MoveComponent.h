@@ -6,6 +6,7 @@
 class MoveComponent : public BaseComponent
 {
 public:
+    MoveComponent(GameObject* gameObject);
     void Update(const GameTimer& gt) override;
     
 };

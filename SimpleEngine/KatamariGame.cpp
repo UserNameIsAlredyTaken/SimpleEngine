@@ -300,14 +300,6 @@ void KatamariGame::UpdateGameObjects(const GameTimer& gt)
 	{
 		go->Update(gt);
 	}
-	// if(!flyCar)
-	// 	return;
-	// std::shared_ptr<GameObject> car = AllGameObjects[0];
-	//
- //    car->LocalTransform.Position.x += gt.DeltaTime() * 10;
- //
-	// car->Ritem->World = car->LocalTransform.GetGlobalWorldMatrix();
-	// car->Ritem->NumFramesDirty = 3;
 }
 
 
@@ -775,7 +767,7 @@ void KatamariGame::BuildGameObjects()
 	auto debugQuad = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
 	
 	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1");
-	auto moveComponent = std::make_shared<MoveComponent>();
+	auto moveComponent = std::make_shared<MoveComponent>(car.get());
 	car->AddComponent(std::move(moveComponent));
 
 	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);

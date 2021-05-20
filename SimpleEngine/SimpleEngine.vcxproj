@@ -832,6 +832,7 @@
       <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\include;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="WindowStyle.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -855,6 +856,7 @@
     <ClInclude Include="Old\CircleWindow.h" />
     <ClInclude Include="Old\RedrawGame.h" />
     <ClInclude Include="Old\TestRedCircleWindow.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="WindowStyle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -7,12 +7,7 @@ Scale(scale)
 {
 }
 
-XMFLOAT4X4 Transform::GetGlobalWorldMatrix()
-{
-    XMFLOAT4X4 result;
-    XMStoreFloat4x4(&result, XMMatrixTranslation(Position.x, Position.y, Position.z));
-    return result;
-}
+
 
 GameObject::GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform) :
 ParentGameObject(parent),
@@ -59,5 +54,11 @@ void GameObject::AddChild(GameObject* child)
 void GameObject::AddComponent(std::shared_ptr<BaseComponent> component)
 {
     Components.push_back(component);
+}
+
+void GameObject::RefreshWorldMatrix()
+{
+    Ritem->World = LocalTransform.GetGlobalWorldMatrix();
+    Ritem->NumFramesDirty = gNumFrameResources;
 }
 
