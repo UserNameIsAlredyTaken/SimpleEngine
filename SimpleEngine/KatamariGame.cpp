@@ -1,13 +1,13 @@
-﻿#include "ModelsGame.h"
+﻿#include "KatamariGame.h"
 
 #include "Common/GeometryGenerator.h"
 
 const int gNumFrameResources = 3;
 
-ModelsGame::ModelsGame(HINSTANCE hInstance)
+KatamariGame::KatamariGame(HINSTANCE hInstance)
     : Game(hInstance)
 {
-    mMainWndCaption = L"ModelsGame";
+    mMainWndCaption = L"KatamariGame";
 	// Estimate the scene bounding sphere manually since we know how the scene was constructed.
 	// The grid is the "widest object" with a width of 20 and depth of 30.0f, and centered at
 	// the world space origin.  In general, you need to loop over every world space vertex
@@ -16,15 +16,15 @@ ModelsGame::ModelsGame(HINSTANCE hInstance)
 	mSceneBounds.Radius = sqrtf(10.0f*10.0f + 15.0f*15.0f);
 }
 
-ModelsGame::~ModelsGame()
+KatamariGame::~KatamariGame()
 {
     if(md3dDevice != nullptr)
         FlushCommandQueue();
 }
 
-bool ModelsGame::Initialize()
+bool KatamariGame::Initialize()
 {
-    if (!Game::Initialize<ModelsGame>())
+    if (!Game::Initialize<KatamariGame>())
         return false;
 
     // Reset the command list to prep for initialization commands.
@@ -60,12 +60,12 @@ bool ModelsGame::Initialize()
     return true;
 }
 
-LRESULT ModelsGame::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT KatamariGame::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     return Game::BaseMsgProc(hwnd, msg, wParam, lParam);
 }
 
-void ModelsGame::CreateRtvAndDsvDescriptorHeaps()
+void KatamariGame::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
 	rtvHeapDesc.NumDescriptors = SwapChainBufferCount;
@@ -85,14 +85,14 @@ void ModelsGame::CreateRtvAndDsvDescriptorHeaps()
 		&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
 
-void ModelsGame::OnResize()
+void KatamariGame::OnResize()
 {
     Game::BaseOnResize();
 
 	mCamera.SetLens(0.25f*MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 }
 
-void ModelsGame::Update(const GameTimer& gt)
+void KatamariGame::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);	
 
@@ -118,7 +118,7 @@ void ModelsGame::Update(const GameTimer& gt)
 	UpdateShadowPassCB(gt);
 }
 
-void ModelsGame::Draw(const GameTimer& gt)
+void KatamariGame::Draw(const GameTimer& gt)
 {
     auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
 
@@ -196,7 +196,7 @@ void ModelsGame::Draw(const GameTimer& gt)
     mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 }
 
-void ModelsGame::OnMouseDown(WPARAM btnState, int x, int y)
+void KatamariGame::OnMouseDown(WPARAM btnState, int x, int y)
 {
     mLastMousePos.x = x;
     mLastMousePos.y = y;
@@ -204,12 +204,12 @@ void ModelsGame::OnMouseDown(WPARAM btnState, int x, int y)
     SetCapture(mhMainWnd);
 }
 
-void ModelsGame::OnMouseUp(WPARAM btnState, int x, int y)
+void KatamariGame::OnMouseUp(WPARAM btnState, int x, int y)
 {
     ReleaseCapture();
 }
 
-void ModelsGame::OnMouseMove(WPARAM btnState, int x, int y)
+void KatamariGame::OnMouseMove(WPARAM btnState, int x, int y)
 {
     if((btnState & MK_LBUTTON) != 0)
     {
@@ -226,7 +226,7 @@ void ModelsGame::OnMouseMove(WPARAM btnState, int x, int y)
     mLastMousePos.y = y;
 }
 
-void ModelsGame::OnKeyboardInput(const GameTimer& gt)
+void KatamariGame::OnKeyboardInput(const GameTimer& gt)
 {
 	const float dt = gt.DeltaTime();
 
@@ -282,7 +282,7 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	debugKeyPrevStateIsDown = GetAsyncKeyState('1') & 0x8000;
 }
 
-// void ModelsGame::UpdateSunModelPosition()
+// void KatamariGame::UpdateSunModelPosition()
 // {
 	// XMMATRIX translation = XMMatrixTranslation(
 	// 		-mMainPassCB.Lights[0].Direction.x * lightDistance,
@@ -294,7 +294,7 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	// sun->NumFramesDirty = gNumFrameResources;
 // }
 
-void ModelsGame::UpdateObjects(const GameTimer& gt)
+void KatamariGame::UpdateObjects(const GameTimer& gt)
 {
 	if(!flyCar)
 		return;
@@ -307,12 +307,12 @@ void ModelsGame::UpdateObjects(const GameTimer& gt)
 }
 
 
-void ModelsGame::AnimateMaterials(const GameTimer& gt)
+void KatamariGame::AnimateMaterials(const GameTimer& gt)
 {
 	
 }
 
-void ModelsGame::UpdateObjectCBs(const GameTimer& gt)
+void KatamariGame::UpdateObjectCBs(const GameTimer& gt)
 {
     auto currObjectCB = mCurrFrameResource->ObjectCB.get();
 
@@ -340,7 +340,7 @@ void ModelsGame::UpdateObjectCBs(const GameTimer& gt)
 	
 }
 
-void ModelsGame::UpdateMaterialBuffer(const GameTimer& gt)
+void KatamariGame::UpdateMaterialBuffer(const GameTimer& gt)
 {
 	auto currMaterialBuffer = mCurrFrameResource->MaterialBuffer.get();
 	for(auto& e : mMaterials)
@@ -369,7 +369,7 @@ void ModelsGame::UpdateMaterialBuffer(const GameTimer& gt)
 }
 
 
-void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
+void KatamariGame::UpdateMainPassCB(const GameTimer& gt)
 {
 	XMMATRIX view = mCamera.GetView();
 	XMMATRIX proj = mCamera.GetProj();
@@ -411,7 +411,7 @@ void ModelsGame::UpdateMainPassCB(const GameTimer& gt)
     currPassCB->CopyData(0, mMainPassCB);
 }
 
-void ModelsGame::LoadTextures()
+void KatamariGame::LoadTextures()
 {
 	std::vector<std::string> texNames = 
 	{
@@ -439,7 +439,7 @@ void ModelsGame::LoadTextures()
 }
 
 
-void ModelsGame::BuildRootSignature()
+void KatamariGame::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE shadowMapTable;
 	shadowMapTable.Init(
@@ -487,7 +487,7 @@ void ModelsGame::BuildRootSignature()
         IID_PPV_ARGS(mRootSignature.GetAddressOf())));
 }
 
-void ModelsGame::BuildDescriptorHeaps()
+void KatamariGame::BuildDescriptorHeaps()
 {
 	//
 	// Create the SRV heap.
@@ -548,7 +548,7 @@ void ModelsGame::BuildDescriptorHeaps()
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, mDsvDescriptorSize));
 }
 
-void ModelsGame::BuildShadersAndInputLayout()
+void KatamariGame::BuildShadersAndInputLayout()
 {
 	const D3D_SHADER_MACRO alphaTestDefines[] =
 	{
@@ -573,7 +573,7 @@ void ModelsGame::BuildShadersAndInputLayout()
     };
 }
 
-void ModelsGame::BuildShapeGeometry()
+void KatamariGame::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
 
@@ -661,7 +661,7 @@ void ModelsGame::BuildShapeGeometry()
 	mGeometries[geo->Name] = std::move(geo); 
 }
 
-void ModelsGame::BuildPSOs()
+void KatamariGame::BuildPSOs()
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
 
@@ -735,7 +735,7 @@ void ModelsGame::BuildPSOs()
 	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&mPSOs["debug"])));
 }
 
-void ModelsGame::BuildFrameResources()
+void KatamariGame::BuildFrameResources()
 {
 	for(int i = 0; i < gNumFrameResources; ++i)
 	{
@@ -743,7 +743,7 @@ void ModelsGame::BuildFrameResources()
 	}
 }
 
-void ModelsGame::BuildMaterials()
+void KatamariGame::BuildMaterials()
 {
 	auto carMat = std::make_unique<Material>();
 	carMat->Name = "Car";
@@ -765,7 +765,7 @@ void ModelsGame::BuildMaterials()
 	mMaterials["Env"] = std::move(envMat);
 }
 
-void ModelsGame::BuildGameObjects()
+void KatamariGame::BuildGameObjects()
 {	
 	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
 	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1");
@@ -779,7 +779,7 @@ void ModelsGame::BuildGameObjects()
 	AllGameObjects.push_back(std::move(debugQuad));
 	
 }
-void ModelsGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
+void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {
 	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
 	
@@ -799,7 +799,7 @@ void ModelsGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector
 	}	
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> ModelsGame::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> KatamariGame::GetStaticSamplers()
 {
 	// Applications usually only need a handful of samplers.  So just define them all up front
 	// and keep them available as part of the root signature.  
@@ -869,7 +869,7 @@ std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> ModelsGame::GetStaticSamplers()
 	};
 }
 
-void ModelsGame::UpdateShadowPassCB(const GameTimer& gt)
+void KatamariGame::UpdateShadowPassCB(const GameTimer& gt)
 {
 	XMMATRIX view = XMLoadFloat4x4(&mLightView);
 	XMMATRIX proj = XMLoadFloat4x4(&mLightProj);
@@ -898,7 +898,7 @@ void ModelsGame::UpdateShadowPassCB(const GameTimer& gt)
 	currPassCB->CopyData(1, mShadowPassCB);
 }
 
-void ModelsGame::UpdateShadowTransform(const GameTimer& gt)
+void KatamariGame::UpdateShadowTransform(const GameTimer& gt)
 {
 	// Only the first "main" light casts a shadow.
 	XMVECTOR lightDir = XMLoadFloat3(&mMainPassCB.Lights[0].Direction);
@@ -939,7 +939,7 @@ void ModelsGame::UpdateShadowTransform(const GameTimer& gt)
 	XMStoreFloat4x4(&mShadowTransform, S);
 }
 
-void ModelsGame::DrawSceneToShadowMap()
+void KatamariGame::DrawSceneToShadowMap()
 {
 	mCommandList->RSSetViewports(1, &mShadowMap->Viewport());
 	mCommandList->RSSetScissorRects(1, &mShadowMap->ScissorRect());

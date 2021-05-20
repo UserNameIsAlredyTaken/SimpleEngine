@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Camera.h"
+#include "Common/Camera.h"
 #include "FrameResource.h"
 #include "Game.h"
 #include "GameObject.h"
@@ -18,15 +18,15 @@ enum class RenderLayer : int
     Count
 };
 
-class ModelsGame : public Game
+class KatamariGame : public Game
 {
 public:
-    ModelsGame(HINSTANCE hInstance);
-    ~ModelsGame();
+    KatamariGame(HINSTANCE hInstance);
+    ~KatamariGame();
 
     bool Initialize();
 
-    NECESSARY_STATIC_FUNCTIONS(ModelsGame);
+    NECESSARY_STATIC_FUNCTIONS(KatamariGame);
 
 private:
     LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

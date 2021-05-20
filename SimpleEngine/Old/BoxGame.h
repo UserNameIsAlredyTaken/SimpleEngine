@@ -1,7 +1,7 @@
 #pragma once
-#include "Game.h"
-#include "Common/MathHelper.h"
-#include "Common/UploadBuffer.h"
+#include "../Game.h"
+#include "../Common/MathHelper.h"
+#include "../Common/UploadBuffer.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;

@@ -43,6 +43,10 @@ GameObject(parent, mat, geo, subgeoName,
 {
 }
 
+void GameObject::Update(const GameTimer& gt)
+{
+}
+
 void GameObject::AddChild(GameObject* child)
 {
     ChildrenGameOjects.push_back(child);

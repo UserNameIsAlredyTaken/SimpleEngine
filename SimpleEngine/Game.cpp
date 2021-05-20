@@ -1,11 +1,7 @@
 #include "Game.h"
-#include "CircleWindow.h"
-#include "TestRedCircleWindow.h"
-#include "WindowStyle.h"
-#include <memory>
-#include <WindowsX.h>
-#include <string>
-#include <iostream>
+// #include "CircleWindow.h"
+// #include "TestRedCircleWindow.h"
+
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
@@ -209,30 +205,29 @@ LRESULT Game::BaseMsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void Game::CreateWindows()
-{
-    std::shared_ptr<BaseWindow> newWindow = std::make_shared<TestRedCircleWindow>();
-
-    if (newWindow->Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
-    {
-        windows.insert(newWindow);
-    }
-
-    newWindow = std::make_shared<CircleWindow>();
-
-    if (newWindow->Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
-    {
-        windows.insert(newWindow);
-    }
-}
-
-void Game::ShowWindows()
-{
-    for (auto&& window : windows) 
-    {
-        ShowWindow(window->GetHwnd(), SW_SHOWDEFAULT);
-    }
-}
+// void Game::CreateWindows()
+// {
+//     std::shared_ptr<BaseWindow> newWindow = std::make_shared<TestRedCircleWindow>();
+//
+//     if (newWindow->Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
+//     {
+//         windows.insert(newWindow);
+//     }
+//
+//     newWindow = std::make_shared<CircleWindow>();
+//
+//     if (newWindow->Create(L"Red Circle", WS_OVERLAPPEDWINDOW))
+//     {
+//         windows.insert(newWindow);
+//     }
+// }
+// void Game::ShowWindows()
+// {
+//     for (auto&& window : windows) 
+//     {
+//         ShowWindow(window->GetHwnd(), SW_SHOWDEFAULT);
+//     }
+// }
 
 void Game::Update(const GameTimer& gt)
 {

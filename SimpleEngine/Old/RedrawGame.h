@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "Game.h"
+#include "../Game.h"
 #include <DirectXColors.h>
 
 using namespace DirectX;

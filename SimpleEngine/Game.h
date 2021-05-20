@@ -14,11 +14,16 @@
 #include<memory>
 #include "BaseWindow.h"
 #include "set"
-#include "GameTimer.h"
+#include "Common/GameTimer.h"
 #include "Common/d3dUtil.h"
 #include "d3d12.h"
 #include "Common/d3dx12.h"
 #include <functional>
+#include "WindowStyle.h"
+#include <memory>
+#include <WindowsX.h>
+#include <string>
+#include <iostream>
 
 #define NECESSARY_STATIC_FUNCTIONS(GameClass)\
 	static LRESULT GameClass::StaticMsgProc(Game* concreteGame, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)\
@@ -175,10 +180,9 @@ protected:
 	
 
 private:
-	std::set<std::shared_ptr<BaseWindow>> windows;
-
-	void CreateWindows();
-	void ShowWindows();
+	// std::set<std::shared_ptr<BaseWindow>> windows;
+	// void CreateWindows();
+	// void ShowWindows();
 
 
 	void Update(const GameTimer& gt);

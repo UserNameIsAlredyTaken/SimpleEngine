@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BaseWindow.h"
+#include "../BaseWindow.h"
 #include <d2d1.h>
 #include <wrl.h>
 #pragma comment(lib, "d2d1")

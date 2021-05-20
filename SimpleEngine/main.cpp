@@ -6,10 +6,7 @@
 #include <windows.h>
 #include <math.h>
 #include <iostream>
-// #include "Game.h"
-// #include "RedrawGame.h"
-// #include "BoxGame.h"
-#include "ModelsGame.h"
+#include "KatamariGame.h"
 
 
 
@@ -23,7 +20,7 @@ int main()
     // RedrawGame game(GetModuleHandle(NULL));
     try
     {
-        ModelsGame game(GetModuleHandle(NULL));
+        KatamariGame game(GetModuleHandle(NULL));
         if (!game.Initialize())
             return 0;
         

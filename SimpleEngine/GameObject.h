@@ -1,5 +1,7 @@
 ﻿#include <DirectXMath.h>
 #include <vector>
+
+#include "FrameResource.h"
 #include "Game.h"
 
 using namespace DirectX;
@@ -43,7 +45,8 @@ public:
     GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform);
     GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName);
 
-    void AddChild(GameObject* child);    
+    void Update(const GameTimer& gt);
+    void AddChild(GameObject* child);
 
     Transform LocalTransform; //always relative to parent's
     std::shared_ptr<RenderItem> Ritem;
