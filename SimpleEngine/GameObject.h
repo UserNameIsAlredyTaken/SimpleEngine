@@ -39,10 +39,9 @@ struct Transform
 class GameObject
 {
 public:
-    GameObject(GameObject* parent, std::string matName, std::string geoName, Transform transform);
-    GameObject(GameObject* parent, std::string matName, std::string geoName);
+    GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform);
+    GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName);
     
-    std::string MaterialName;
     std::string GeometryName;
 
     void AddChild(GameObject* child);
@@ -53,7 +52,9 @@ private:
     GameObject* ParentGameObject;
     std::vector<GameObject*> ChildrenGameOjects;
     
-    Transform LocalTransform; //always relative to parent's     
+    Transform LocalTransform; //always relative to parent's
+
+    inline static int cbIndex = 0;
     
 };
 

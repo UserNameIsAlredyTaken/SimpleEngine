@@ -46,7 +46,6 @@ bool ModelsGame::Initialize()
     BuildShapeGeometry();
 	BuildMaterials();
 	BuildGameObjects();
-    BuildRenderItems();
     BuildFrameResources();
     BuildPSOs();
 
@@ -95,9 +94,7 @@ void ModelsGame::OnResize()
 
 void ModelsGame::Update(const GameTimer& gt)
 {
-    OnKeyboardInput(gt);
-	// UpdateSunModelPosition();
-	
+    OnKeyboardInput(gt);	
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -168,12 +165,12 @@ void ModelsGame::Draw(const GameTimer& gt)
 	mCommandList->SetGraphicsRootConstantBufferView(1, passCB->GetGPUVirtualAddress());
 
 	mCommandList->SetPipelineState(mPSOs["opaque"].Get());
-	DrawGameObjects(mCommandList.Get(), RenderLayers[(int)RenderLayer::Opaque]/*mRitemLayer[(int)RenderLayer::Opaque]*/);
+	DrawGameObjects(mCommandList.Get(), RenderLayers[(int)RenderLayer::Opaque]);
 
 	if(showDebug)
 	{
 		mCommandList->SetPipelineState(mPSOs["debug"].Get());
-		DrawGameObjects(mCommandList.Get(), RenderLayers[(int)RenderLayer::Opaque]/*mRitemLayer[(int)RenderLayer::Debug]*/);
+		DrawGameObjects(mCommandList.Get(), RenderLayers[(int)RenderLayer::Debug]);
 	}	
 
     // Indicate a state transition on the resource usage.
@@ -281,8 +278,8 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	debugKeyPrevStateIsDown = GetAsyncKeyState('1') & 0x8000;
 }
 
-void ModelsGame::UpdateSunModelPosition()
-{
+// void ModelsGame::UpdateSunModelPosition()
+// {
 	// XMMATRIX translation = XMMatrixTranslation(
 	// 		-mMainPassCB.Lights[0].Direction.x * lightDistance,
 	// 			-mMainPassCB.Lights[0].Direction.y * lightDistance,
@@ -291,7 +288,7 @@ void ModelsGame::UpdateSunModelPosition()
 	// RenderItem* sun = mRitemLayer[(int)RenderLayer::Opaque][mRitemLayer[(int)RenderLayer::Opaque].size() - 1];
 	// XMStoreFloat4x4(&sun->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*translation);
 	// sun->NumFramesDirty = gNumFrameResources;
-}
+// }
 
 
 
@@ -325,26 +322,6 @@ void ModelsGame::UpdateObjectCBs(const GameTimer& gt)
 			ritem->NumFramesDirty--;
 		}
 	}
-   //  for(auto& e : mAllRitems)
-   //  {
-   //      // Only update the cbuffer data if the constants have changed.  
-   //      // This needs to be tracked per frame resource.
-   //      if(e->NumFramesDirty > 0)
-   //      {
-   //          XMMATRIX world = XMLoadFloat4x4(&e->World);
-   //      	XMMATRIX texTransform = XMLoadFloat4x4(&e->TexTransform);
-   //
-   //          ObjectConstants objConstants;
-   //          XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
-   //      	XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
-			// objConstants.MaterialIndex = e->Mat->MatCBIndex;
-   //      	
-   //          currObjectCB->CopyData(e->ObjCBIndex, objConstants);
-   //
-   //          // Next FrameResource need to be updated too.
-   //          e->NumFramesDirty--;
-   //      }
-   //  }
 }
 
 void ModelsGame::UpdateMaterialBuffer(const GameTimer& gt)
@@ -838,161 +815,18 @@ void ModelsGame::BuildMaterials()
 
 void ModelsGame::BuildGameObjects()
 {	
-	auto grid = std::make_shared<GameObject>(nullptr, "Env", "grid");
-	auto car = std::make_shared<GameObject>(nullptr, "Car", "box");
+	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
+	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "box");
+	auto debugQuad = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
 
+	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
+	RenderLayers[(int)RenderLayer::Opaque].push_back(car);
+	RenderLayers[(int)RenderLayer::Debug].push_back(debugQuad);
 	AllGameObjects.push_back(std::move(grid));
-	AllGameObjects.push_back(std::move(car));	
-}
-
-void ModelsGame::BuildRenderItems()
-{
-	int ritemCBIndex = 0;
-	for(auto& go : AllGameObjects)
-	{
-		auto ritem = std::make_shared<RenderItem>();
-		ritem->World = MathHelper::Identity4x4();
-		ritem->TexTransform = MathHelper::Identity4x4();
-		ritem->ObjCBIndex = ritemCBIndex++;
-		ritem->Mat = mMaterials[go->MaterialName].get();
-		ritem->Geo = mGeometries["shapeGeo"].get();
-		ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		ritem->IndexCount = mGeometries["shapeGeo"]->DrawArgs[go->GeometryName].IndexCount;
-		ritem->StartIndexLocation = mGeometries["shapeGeo"]->DrawArgs[go->GeometryName].StartIndexLocation;
-		ritem->BaseVertexLocation = mGeometries["shapeGeo"]->DrawArgs[go->GeometryName].BaseVertexLocation;
-
-		go->Ritem = std::move(ritem);
-		RenderLayers[(int)RenderLayer::Opaque].push_back(go);
-		// mRitemLayer[(int)RenderLayer::Opaque].push_back(go->Ritem);
-		// mAllRitems.push_back(std::move(ritem));
-	}
+	AllGameObjects.push_back(std::move(car));
+	AllGameObjects.push_back(std::move(debugQuad));
 	
-	// auto quadRitem = std::make_unique<RenderItem>();
-	// quadRitem->World = MathHelper::Identity4x4();
-	// quadRitem->TexTransform = MathHelper::Identity4x4();
-	// quadRitem->ObjCBIndex = 1;
-	// quadRitem->Mat = mMaterials["Car"].get();
-	// quadRitem->Geo = mGeometries["shapeGeo"].get();
-	// quadRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// quadRitem->IndexCount = quadRitem->Geo->DrawArgs["quad"].IndexCount;
-	// quadRitem->StartIndexLocation = quadRitem->Geo->DrawArgs["quad"].StartIndexLocation;
-	// quadRitem->BaseVertexLocation = quadRitem->Geo->DrawArgs["quad"].BaseVertexLocation;
- //
-	// mRitemLayer[(int)RenderLayer::Debug].push_back(quadRitem.get());
-	// mAllRitems.push_back(std::move(quadRitem));
-	//
-	// auto carRitem = std::make_unique<RenderItem>();
-	// XMStoreFloat4x4(&carRitem->World, XMMatrixScaling(1.0f, 1.0f, 1.0f)*XMMatrixTranslation(0.0f, 0.0f, 0.0f));
-	// XMStoreFloat4x4(&carRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	// carRitem->ObjCBIndex = 0;
-	// carRitem->Mat = mMaterials["Car"].get();
-	// carRitem->Geo = mGeometries["shapeGeo"].get();
-	// carRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// carRitem->IndexCount = carRitem->Geo->DrawArgs["box"].IndexCount;
-	// carRitem->StartIndexLocation = carRitem->Geo->DrawArgs["box"].StartIndexLocation;
-	// carRitem->BaseVertexLocation = carRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-	//
-	// mRitemLayer[(int)RenderLayer::Opaque].push_back(carRitem.get());
-	// mAllRitems.push_back(std::move(carRitem));
- //
- //    auto gridRitem = std::make_unique<RenderItem>();
-	// gridRitem->World = MathHelper::Identity4x4();
-	// // XMStoreFloat4x4(&gridRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, -10.0f, 0.0f));
-	// XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	// gridRitem->ObjCBIndex = 1;
-	// gridRitem->Mat = mMaterials["Env"].get();
-	// gridRitem->Geo = mGeometries["shapeGeo"].get();
-	// gridRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
- //    gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
- //    gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
- //    gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
-	//
-	// mRitemLayer[(int)RenderLayer::Opaque].push_back(gridRitem.get());
-	// mAllRitems.push_back(std::move(gridRitem));
- //
-	// XMMATRIX brickTexTransform = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	// UINT objCBIndex = 2;
-	// for(int i = 0; i < 5; ++i)
-	// {
-	// 	auto leftCylRitem = std::make_unique<RenderItem>();
-	// 	auto rightCylRitem = std::make_unique<RenderItem>();
-	// 	auto leftSphereRitem = std::make_unique<RenderItem>();
-	// 	auto rightSphereRitem = std::make_unique<RenderItem>();
-	//
-	// 	XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f-10.0f, -10.0f + i*5.0f);
-	// 	XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f-10.0f, -10.0f + i*5.0f);
-	//
-	// 	XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f-10.0f, -10.0f + i*5.0f);
-	// 	XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f-10.0f, -10.0f + i*5.0f);
-	//
-	// 	XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
-	// 	XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
-	// 	leftCylRitem->ObjCBIndex = objCBIndex++;
-	// 	leftCylRitem->Mat = mMaterials["Env"].get();
-	// 	leftCylRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	leftCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-	// 	leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-	// 	leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-	//
-	// 	XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
-	// 	XMStoreFloat4x4(&rightCylRitem->TexTransform, brickTexTransform);
-	// 	rightCylRitem->ObjCBIndex = objCBIndex++;
-	// 	rightCylRitem->Mat = mMaterials["Env"].get();
-	// 	rightCylRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	rightCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-	// 	rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-	// 	rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-	//
-	// 	XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-	// 	XMStoreFloat4x4(&leftSphereRitem->TexTransform, brickTexTransform);
-	// 	leftSphereRitem->ObjCBIndex = objCBIndex++;
-	// 	leftSphereRitem->Mat = mMaterials["Env"].get();
-	// 	leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	leftSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-	// 	leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	// 	leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-	//
-	// 	XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-	// 	XMStoreFloat4x4(&rightSphereRitem->TexTransform, brickTexTransform);
-	// 	rightSphereRitem->ObjCBIndex = objCBIndex++;
-	// 	rightSphereRitem->Mat = mMaterials["Env"].get();
-	// 	rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	rightSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-	// 	rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	// 	rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-	//
-	// 	mRitemLayer[(int)RenderLayer::Opaque].push_back(leftCylRitem.get());
-	// 	mRitemLayer[(int)RenderLayer::Opaque].push_back(rightCylRitem.get());
-	// 	mRitemLayer[(int)RenderLayer::Opaque].push_back(leftSphereRitem.get());
-	// 	mRitemLayer[(int)RenderLayer::Opaque].push_back(rightSphereRitem.get());
-	//
-	// 	mAllRitems.push_back(std::move(leftCylRitem));
-	// 	mAllRitems.push_back(std::move(rightCylRitem));
-	// 	mAllRitems.push_back(std::move(leftSphereRitem));
-	// 	mAllRitems.push_back(std::move(rightSphereRitem));
-	// }
-	
-
-	// auto sunRitem = std::make_unique<RenderItem>();
-	//
-	// XMStoreFloat4x4(&sunRitem->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*XMMatrixTranslation(0,0,0));
-	// XMStoreFloat4x4(&sunRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	// sunRitem->ObjCBIndex = objCBIndex;
-	// sunRitem->Mat = mMaterials["Env"].get();
-	// sunRitem->Geo = mGeometries["shapeGeo"].get();
-	// sunRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// sunRitem->IndexCount = sunRitem->Geo->DrawArgs["sphere"].IndexCount;
-	// sunRitem->StartIndexLocation = sunRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	// sunRitem->BaseVertexLocation = sunRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-	// mRitemLayer[(int)RenderLayer::Opaque].push_back(sunRitem.get());
-	// mAllRitems.push_back(std::move(sunRitem));
 }
-
-
 void ModelsGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {
 	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));

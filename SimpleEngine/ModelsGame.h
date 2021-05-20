@@ -36,7 +36,6 @@ private:
     virtual void CreateRtvAndDsvDescriptorHeaps()override;
 
     void OnKeyboardInput(const GameTimer& gt);
-    void UpdateSunModelPosition();
     void AnimateMaterials(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateShadowTransform(const GameTimer& gt);
@@ -57,7 +56,6 @@ private:
     void BuildFrameResources();
     void BuildMaterials();
     void BuildGameObjects();
-    void BuildRenderItems();
     void DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems);
     void DrawSceneToShadowMap();
 
@@ -81,14 +79,10 @@ private:
     std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> mPSOs;
 
     std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
-
-    // List of all the render items.
-    // std::vector<std::unique_ptr<RenderItem>> mAllRitems;
     
     std::vector<std::shared_ptr<GameObject>> AllGameObjects;
 
-    // Render items divided by PSO.
-    std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
+    // Render layers divided by PSO.
     std::vector<std::shared_ptr<GameObject>> RenderLayers[(int)RenderLayer::Count];
 
     UINT mShadowMapHeapIndex = 0;
