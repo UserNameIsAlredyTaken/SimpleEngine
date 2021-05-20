@@ -576,127 +576,70 @@ void ModelsGame::BuildShadersAndInputLayout()
 void ModelsGame::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
-	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);	
-	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\teapot.fbx");
-	GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\car_1.fbx");
-	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\George.fbx");
-	// GeometryGenerator::MeshData box = geoGen.CreateSphere(0.5f, 20, 20);	
-	GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\teapot.fbx");
-	// GeometryGenerator::MeshData sphere = geoGen.LoadMesh("Models\\George.fbx");
-	// GeometryGenerator::MeshData box = geoGen.LoadMesh("Models\\cube.fbx");
-	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
+
+	std::vector<std::pair<std::string,std::string>> modelAddressesWithNames = 
+	{
+		// {"teapot", "Models\\teapot.fbx"},
+		{"car_1", "Models\\car_1.fbx"},
+		// {"car_2", "Models\\car_2.fbx"},
+		// {"cube", "Models\\cube.fbx"},
+		// {"George", "Models\\George.fbx"},
+	};
+	
+	std::vector<std::pair<std::string,GeometryGenerator::MeshData>> meshesWithNames;
+	for(auto addressWithName : modelAddressesWithNames)
+	{
+		GeometryGenerator::MeshData mesh = geoGen.LoadMesh(addressWithName.second.c_str());
+		meshesWithNames.push_back(std::make_pair(addressWithName.first,mesh));
+	}
+
+	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
+	meshesWithNames.push_back(std::make_pair("grid",grid));
 	GeometryGenerator::MeshData quad = geoGen.CreateQuad(0.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+	meshesWithNames.push_back(std::make_pair("quad",quad));
+	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
+	// meshes.push_back(sphere);
+	// GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
+	// meshes.push_back(cylinder);
 
-	//
-	// We are concatenating all the geometry into one big vertex/index buffer.  So
-	// define the regions in the buffer each submesh covers.
-	//
-
-	// Cache the vertex offsets to each object in the concatenated vertex buffer.
-	UINT boxVertexOffset = 0;
-	UINT gridVertexOffset = (UINT)box.Vertices.size();
-	UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
-	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
-	UINT quadVertexOffset = cylinderVertexOffset + (UINT)cylinder.Vertices.size();
-
-	// Cache the starting index for each object in the concatenated index buffer.
-	UINT boxIndexOffset = 0;
-	UINT gridIndexOffset = (UINT)box.Indices32.size();
-	UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
-	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
-	UINT quadIndexOffset = cylinderIndexOffset + (UINT)cylinder.Indices32.size();
-
-    // Define the SubmeshGeometry that cover different 
-    // regions of the vertex/index buffers.
-
-	SubmeshGeometry boxSubmesh;
-	boxSubmesh.IndexCount = (UINT)box.Indices32.size();
-	boxSubmesh.StartIndexLocation = boxIndexOffset;
-	boxSubmesh.BaseVertexLocation = boxVertexOffset;
-
-	SubmeshGeometry gridSubmesh;
-	gridSubmesh.IndexCount = (UINT)grid.Indices32.size();
-	gridSubmesh.StartIndexLocation = gridIndexOffset;
-	gridSubmesh.BaseVertexLocation = gridVertexOffset;
-
-	SubmeshGeometry sphereSubmesh;
-	sphereSubmesh.IndexCount = (UINT)sphere.Indices32.size();
-	sphereSubmesh.StartIndexLocation = sphereIndexOffset;
-	sphereSubmesh.BaseVertexLocation = sphereVertexOffset;
-
-	SubmeshGeometry cylinderSubmesh;
-	cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
-	cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
-	cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
-
-	SubmeshGeometry quadSubmesh;
-	quadSubmesh.IndexCount = (UINT)quad.Indices32.size();
-	quadSubmesh.StartIndexLocation = quadIndexOffset;
-	quadSubmesh.BaseVertexLocation = quadVertexOffset;
-
-	//
-	// Extract the vertex elements we are interested in and pack the
-	// vertices of all the meshes into one vertex buffer.
-	//
-
-	auto totalVertexCount =
-		box.Vertices.size() +
-		grid.Vertices.size() +
-		sphere.Vertices.size() +
-		cylinder.Vertices.size() +
-		quad.Vertices.size();
-
-	std::vector<Vertex> vertices(totalVertexCount);
-
-	UINT k = 0;
-	for(size_t i = 0; i < box.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = box.Vertices[i].Position;
-		vertices[k].Norm = box.Vertices[i].Normal;
-		vertices[k].TexC = box.Vertices[i].TexC;
-	}
-
-	for(size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = grid.Vertices[i].Position;
-		vertices[k].Norm = grid.Vertices[i].Normal;
-		vertices[k].TexC = grid.Vertices[i].TexC;
-	}
-
-	for(size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = sphere.Vertices[i].Position;
-		vertices[k].Norm = sphere.Vertices[i].Normal;
-		vertices[k].TexC = sphere.Vertices[i].TexC;
-	}
-
-	for(size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = cylinder.Vertices[i].Position;
-		vertices[k].Norm = cylinder.Vertices[i].Normal;
-		vertices[k].TexC = cylinder.Vertices[i].TexC;
-	}
-
-	for(int i = 0; i < quad.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = quad.Vertices[i].Position;
-		vertices[k].Norm = quad.Vertices[i].Normal;
-		vertices[k].TexC = quad.Vertices[i].TexC;
-	}
+	int totalVerexCount = 0;
+	for(auto meshWithName : meshesWithNames)
+		totalVerexCount += meshWithName.second.Vertices.size();
+	std::vector<Vertex> vertices(totalVerexCount);
 
 	std::vector<std::uint16_t> indices;
-	indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
-	indices.insert(indices.end(), std::begin(grid.GetIndices16()), std::end(grid.GetIndices16()));
-	indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
-	indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
-	indices.insert(indices.end(), std::begin(quad.GetIndices16()), std::end(quad.GetIndices16()));
-
-    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
-    const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::uint16_t);
 
 	auto geo = std::make_unique<MeshGeometry>();
-	geo->Name = "shapeGeo";
+	geo->Name = "shapeGeo";	
+
+	
+	UINT vertexOffset = 0;
+	UINT indexOffset = 0;
+	UINT vertexNum = 0;
+	for(auto meshWithName : meshesWithNames)
+	{
+		SubmeshGeometry submesh;
+
+		submesh.IndexCount = (UINT)meshWithName.second.Indices32.size();
+		submesh.StartIndexLocation = indexOffset;
+		submesh.BaseVertexLocation = vertexOffset;
+
+		vertexOffset += (UINT)meshWithName.second.Vertices.size();
+		indexOffset += (UINT)meshWithName.second.Indices32.size();
+
+		for(int i = 0; i < meshWithName.second.Vertices.size(); ++i, ++vertexNum)
+		{
+			vertices[vertexNum].Pos = meshWithName.second.Vertices[i].Position;
+			vertices[vertexNum].Norm = meshWithName.second.Vertices[i].Normal;
+			vertices[vertexNum].TexC = meshWithName.second.Vertices[i].TexC;
+		}
+		indices.insert(indices.end(), std::begin(meshWithName.second.GetIndices16()), std::end(meshWithName.second.GetIndices16()));
+
+		geo->DrawArgs[meshWithName.first] = submesh;
+	}
+
+	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
 	ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
 	CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
@@ -715,13 +658,7 @@ void ModelsGame::BuildShapeGeometry()
 	geo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	geo->IndexBufferByteSize = ibByteSize;
 
-	geo->DrawArgs["box"] = boxSubmesh;
-	geo->DrawArgs["grid"] = gridSubmesh;
-	geo->DrawArgs["sphere"] = sphereSubmesh;
-	geo->DrawArgs["cylinder"] = cylinderSubmesh;
-	geo->DrawArgs["quad"] = quadSubmesh;
-
-	mGeometries[geo->Name] = std::move(geo);
+	mGeometries[geo->Name] = std::move(geo); 
 }
 
 void ModelsGame::BuildPSOs()
@@ -802,7 +739,6 @@ void ModelsGame::BuildFrameResources()
 {
 	for(int i = 0; i < gNumFrameResources; ++i)
 	{
-		// mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(), 2, (UINT)mAllRitems.size(), (UINT)mMaterials.size()));
 		mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(), 2, (UINT)AllGameObjects.size(), (UINT)AllGameObjects.size()));
 	}
 }
@@ -812,7 +748,7 @@ void ModelsGame::BuildMaterials()
 	auto carMat = std::make_unique<Material>();
 	carMat->Name = "Car";
 	carMat->MatCBIndex = 0;
-	carMat->DiffuseSrvHeapIndex = 0;
+	carMat->DiffuseSrvHeapIndex = 0; //index of texture
 	carMat->DiffuseAlbedo = XMFLOAT4(Colors::White);
 	carMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	carMat->Roughness = 0.5f;
@@ -820,7 +756,7 @@ void ModelsGame::BuildMaterials()
 	auto envMat = std::make_unique<Material>();
 	envMat->Name = "Env";
 	envMat->MatCBIndex = 1;
-	envMat->DiffuseSrvHeapIndex = 1;
+	envMat->DiffuseSrvHeapIndex = 1; //index of texture
 	envMat->DiffuseAlbedo = XMFLOAT4(Colors::White);
 	envMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
 	envMat->Roughness = 1.0f;
@@ -832,7 +768,7 @@ void ModelsGame::BuildMaterials()
 void ModelsGame::BuildGameObjects()
 {	
 	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
-	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "box");
+	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1");
 	auto debugQuad = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
 
 	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
