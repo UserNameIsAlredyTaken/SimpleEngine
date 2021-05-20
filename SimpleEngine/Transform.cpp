@@ -7,7 +7,7 @@ Scale(scale)
 {
 }
 
-Transform::Transform(XMFLOAT3 pos) : Transform(pos, {0, 0, 0}, {0, 0, 0})
+Transform::Transform(XMFLOAT3 pos) : Transform(pos, {0, 0, 0}, {1, 1, 1})
 {    
 }
 
@@ -38,6 +38,6 @@ void Transform::SetRotation(XMFLOAT3 rot)
 
 void Transform::SetScale(XMFLOAT3 scale)
 {
-    Scale = Scale;
+    Scale = scale;
 }
 

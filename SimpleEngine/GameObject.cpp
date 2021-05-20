@@ -31,7 +31,7 @@ GameObject(parent, mat, geo, subgeoName,
     Transform(
         {0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f})
+        {1.0f, 1.0f, 1.0f})
         )
 {
 }
@@ -78,7 +78,7 @@ XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
         XMMatrixRotationX(LocalTransform.GetRotation().x) *
         XMMatrixRotationY(LocalTransform.GetRotation().y) *
         XMMatrixRotationZ(LocalTransform.GetRotation().z) *
-        // XMMatrixScalingFromVector({LocalTransform.GetScale().x, LocalTransform.GetScale().y, LocalTransform.GetScale().z}) *
+        XMMatrixScaling(LocalTransform.GetScale().x, LocalTransform.GetScale().y, LocalTransform.GetScale().z) *
         parentMatrix
         );
     return result;
