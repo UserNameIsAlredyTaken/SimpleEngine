@@ -1,5 +1,16 @@
 ﻿#include "Transform.h"
 
+Transform::Transform(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scale) :
+Position(pos),
+Rotation(rot),
+Scale(scale)
+{
+}
+
+Transform::Transform(XMFLOAT3 pos) : Transform(pos, {0, 0, 0}, {0, 0, 0})
+{    
+}
+
 XMFLOAT3 Transform::GetPosition()
 {
     return Position;
@@ -30,15 +41,3 @@ void Transform::SetScale(XMFLOAT3 scale)
     Scale = Scale;
 }
 
-
-XMFLOAT4X4 Transform::GetGlobalWorldMatrix()
-{
-    XMFLOAT4X4 result;
-    XMStoreFloat4x4(&result,
-        XMMatrixTranslation(Position.x, Position.y, Position.z) *
-        XMMatrixRotationX(Rotation.x) *
-        XMMatrixRotationY(Rotation.y) *
-        XMMatrixRotationZ(Rotation.z) 
-        );
-    return result;
-}

@@ -42,7 +42,7 @@ public:
     void Update(const GameTimer& gt);
     void AddChild(GameObject* child);
     void AddComponent(std::shared_ptr<BaseComponent> component);
-    void RefreshWorldMatrix();
+    void RefreshWorldMatrix();    
 
     Transform LocalTransform; //always relative to parent's
     std::shared_ptr<RenderItem> Ritem;
@@ -52,6 +52,7 @@ private:
     GameObject* ParentGameObject;
     std::vector<GameObject*> ChildrenGameOjects;
     std::vector<std::shared_ptr<BaseComponent>> Components;
+    XMFLOAT4X4 GetGlobalWorldMatrix();
     
 
     inline static int cbIndex = 0;

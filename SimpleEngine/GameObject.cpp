@@ -1,12 +1,5 @@
 ﻿#include "GameObject.h"
 
-Transform::Transform(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scale) :
-Position(pos),
-Rotation(rot),
-Scale(scale)
-{
-}
-
 
 
 GameObject::GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform) :
@@ -15,7 +8,7 @@ GeometryName(subgeoName),
 LocalTransform(transform)
 {
     auto ritem = std::make_shared<RenderItem>();
-    ritem->World = MathHelper::Identity4x4();
+    ritem->World = GetGlobalWorldMatrix();
     ritem->TexTransform = MathHelper::Identity4x4();
     ritem->ObjCBIndex = cbIndex++;
     ritem->Mat = mat;
@@ -26,6 +19,11 @@ LocalTransform(transform)
     ritem->BaseVertexLocation = geo->DrawArgs[subgeoName].BaseVertexLocation;
 
     Ritem = std::move(ritem);
+
+    //add self to parents child list
+    if(parent)
+        parent->AddChild(this);
+    
 }
 
 GameObject::GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName) :
@@ -56,9 +54,33 @@ void GameObject::AddComponent(std::shared_ptr<BaseComponent> component)
     Components.push_back(component);
 }
 
+
 void GameObject::RefreshWorldMatrix()
 {
-    Ritem->World = LocalTransform.GetGlobalWorldMatrix();
-    Ritem->NumFramesDirty = gNumFrameResources;
+    Ritem->World = GetGlobalWorldMatrix(); //recalculates world matrix for this game objects and stores it in assosiated RenderItem
+    //set dirty flag for all frame resources
+    //this forces to ubdate objects constant buffer 
+    Ritem->NumFramesDirty = gNumFrameResources; 
+
+    for(auto& child : ChildrenGameOjects)
+        child->RefreshWorldMatrix();
+}
+
+XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
+{
+    //recursively calculates world matrix from parents chain
+    XMMATRIX parentMatrix = ParentGameObject ? XMLoadFloat4x4(&ParentGameObject->GetGlobalWorldMatrix()) : XMLoadFloat4x4(&MathHelper::Identity4x4());
+    
+    XMFLOAT4X4 result;
+    //calclate world matrix from position, rotation and scale
+    XMStoreFloat4x4(&result,
+        XMMatrixTranslation(LocalTransform.GetPosition().x, LocalTransform.GetPosition().y, LocalTransform.GetPosition().z) *
+        XMMatrixRotationX(LocalTransform.GetRotation().x) *
+        XMMatrixRotationY(LocalTransform.GetRotation().y) *
+        XMMatrixRotationZ(LocalTransform.GetRotation().z) *
+        // XMMatrixScalingFromVector({LocalTransform.GetScale().x, LocalTransform.GetScale().y, LocalTransform.GetScale().z}) *
+        parentMatrix
+        );
+    return result;
 }
 

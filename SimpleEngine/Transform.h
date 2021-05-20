@@ -6,6 +6,7 @@ class Transform
 {
 public:
     Transform(XMFLOAT3 pos, XMFLOAT3 rot, XMFLOAT3 scale);
+    Transform(XMFLOAT3 pos);
 
     XMFLOAT3 GetPosition();
     XMFLOAT3 GetRotation();
@@ -13,9 +14,7 @@ public:
     
     void SetPosition(XMFLOAT3 pos);
     void SetRotation(XMFLOAT3 rot);
-    void SetScale(XMFLOAT3 scale);
-    
-    XMFLOAT4X4 GetGlobalWorldMatrix();
+    void SetScale(XMFLOAT3 scale);    
 
 private:
     XMFLOAT3 Position;

@@ -282,18 +282,6 @@ void KatamariGame::OnKeyboardInput(const GameTimer& gt)
 	debugKeyPrevStateIsDown = GetAsyncKeyState('1') & 0x8000;
 }
 
-// void KatamariGame::UpdateSunModelPosition()
-// {
-	// XMMATRIX translation = XMMatrixTranslation(
-	// 		-mMainPassCB.Lights[0].Direction.x * lightDistance,
-	// 			-mMainPassCB.Lights[0].Direction.y * lightDistance,
-	// 			-mMainPassCB.Lights[0].Direction.z * lightDistance);
-	//
-	// RenderItem* sun = mRitemLayer[(int)RenderLayer::Opaque][mRitemLayer[(int)RenderLayer::Opaque].size() - 1];
-	// XMStoreFloat4x4(&sun->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*translation);
-	// sun->NumFramesDirty = gNumFrameResources;
-// }
-
 void KatamariGame::UpdateGameObjects(const GameTimer& gt)
 {
 	for(auto& go : AllGameObjects)
@@ -304,8 +292,7 @@ void KatamariGame::UpdateGameObjects(const GameTimer& gt)
 
 
 void KatamariGame::AnimateMaterials(const GameTimer& gt)
-{
-	
+{	
 }
 
 void KatamariGame::UpdateObjectCBs(const GameTimer& gt)
@@ -575,7 +562,7 @@ void KatamariGame::BuildShapeGeometry()
 
 	std::vector<std::pair<std::string,std::string>> modelAddressesWithNames = 
 	{
-		// {"teapot", "Models\\teapot.fbx"},
+		{"teapot", "Models\\teapot.fbx"},
 		{"car_1", "Models\\car_1.fbx"},
 		// {"car_2", "Models\\car_2.fbx"},
 		// {"cube", "Models\\cube.fbx"},
@@ -766,15 +753,20 @@ void KatamariGame::BuildGameObjects()
 	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");	
 	auto debugQuad = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
 	
-	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1");
+	
+	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({0.0f, 1.0f, 0.0f}));
 	auto moveComponent = std::make_shared<MoveComponent>(car.get());
 	car->AddComponent(std::move(moveComponent));
 
+	auto teapod = std::make_shared<GameObject>(car.get(), mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot");
+
 	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
 	RenderLayers[(int)RenderLayer::Opaque].push_back(car);
+	RenderLayers[(int)RenderLayer::Opaque].push_back(teapod);
 	RenderLayers[(int)RenderLayer::Debug].push_back(debugQuad);
 	AllGameObjects.push_back(std::move(grid));
 	AllGameObjects.push_back(std::move(car));
+	AllGameObjects.push_back(std::move(teapod));
 	AllGameObjects.push_back(std::move(debugQuad));
 	
 }
