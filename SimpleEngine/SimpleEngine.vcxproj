@@ -355,6 +355,7 @@
     </ClCompile>
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelsGame.cpp" />
@@ -377,6 +378,7 @@
     <ClInclude Include="Common\UploadBuffer.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="ModelsGame.h" />
     <ClInclude Include="NewModelsGame.h" />

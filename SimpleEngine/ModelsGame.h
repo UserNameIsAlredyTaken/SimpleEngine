@@ -2,34 +2,14 @@
 #include "Camera.h"
 #include "FrameResource.h"
 #include "Game.h"
+#include "GameObject.h"
 #include "ShadowMap.h"
 #include "Common/UploadBuffer.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 
-struct RenderItem
-{
-    RenderItem() = default;
 
-    XMFLOAT4X4 World = MathHelper::Identity4x4();
-    XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
-
-    int NumFramesDirty = gNumFrameResources;
-
-    // Index into GPU constant buffer corresponding to the ObjectCB for this render item.
-    UINT ObjCBIndex = -1;
-
-    Material* Mat = nullptr;
-    MeshGeometry* Geo = nullptr;
-
-    D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-    // DrawIndexedInstanced parameters.
-    UINT IndexCount = 0;
-    UINT StartIndexLocation = 0;
-    int BaseVertexLocation = 0;
-};
 
 enum class RenderLayer : int
 {
@@ -76,8 +56,9 @@ private:
     void BuildPSOs();
     void BuildFrameResources();
     void BuildMaterials();
+    void BuildGameObjects();
     void BuildRenderItems();
-    void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
+    void DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems);
     void DrawSceneToShadowMap();
 
     std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
@@ -102,10 +83,13 @@ private:
     std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
     // List of all the render items.
-    std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+    // std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+    
+    std::vector<std::shared_ptr<GameObject>> AllGameObjects;
 
     // Render items divided by PSO.
     std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
+    std::vector<std::shared_ptr<GameObject>> RenderLayers[(int)RenderLayer::Count];
 
     UINT mShadowMapHeapIndex = 0;
     UINT mShadowSrvIndex = 0;
@@ -140,6 +124,7 @@ private:
 
     bool debugKeyPrevStateIsDown = false;
     bool showDebug = false;
+
 };
 
 

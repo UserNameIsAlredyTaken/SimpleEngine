@@ -1,0 +1,60 @@
+﻿#include <DirectXMath.h>
+#include <vector>
+#include "Game.h"
+
+using namespace DirectX;
+
+struct RenderItem
+{
+    RenderItem() = default;
+
+    XMFLOAT4X4 World = MathHelper::Identity4x4();
+    XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();  
+    
+    int NumFramesDirty = gNumFrameResources;
+
+    // Index into GPU constant buffer corresponding to the ObjectCB for this render item.
+    UINT ObjCBIndex = -1;
+
+    Material* Mat = nullptr;
+    MeshGeometry* Geo = nullptr;
+
+    D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+    // DrawIndexedInstanced parameters.
+    UINT IndexCount = 0;
+    UINT StartIndexLocation = 0;
+    int BaseVertexLocation = 0;
+};
+
+struct Transform
+{
+    DirectX::XMFLOAT3 Position;
+    DirectX::XMFLOAT3 Rotation;
+    DirectX::XMFLOAT3 Scale;
+
+    Transform(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scale);
+};
+
+class GameObject
+{
+public:
+    GameObject(GameObject* parent, std::string matName, std::string geoName, Transform transform);
+    GameObject(GameObject* parent, std::string matName, std::string geoName);
+    
+    std::string MaterialName;
+    std::string GeometryName;
+
+    void AddChild(GameObject* child);
+
+    std::shared_ptr<RenderItem> Ritem;   
+
+private:
+    GameObject* ParentGameObject;
+    std::vector<GameObject*> ChildrenGameOjects;
+    
+    Transform LocalTransform; //always relative to parent's     
+    
+};
+
+
