@@ -39,6 +39,7 @@ private:
     void AnimateMaterials(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateShadowTransform(const GameTimer& gt);
+    void UpdateObjects(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
     void UpdateShadowPassCB(const GameTimer& gt);
@@ -119,7 +120,11 @@ private:
     bool debugKeyPrevStateIsDown = false;
     bool showDebug = false;
 
+    bool flyCar = false;
+
 };
+
+
 
 
 

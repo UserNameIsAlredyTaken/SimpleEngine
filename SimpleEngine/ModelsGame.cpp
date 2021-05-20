@@ -110,6 +110,7 @@ void ModelsGame::Update(const GameTimer& gt)
         CloseHandle(eventHandle);
     }
 
+	UpdateObjects(gt);
     UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
     UpdateMainPassCB(gt);
@@ -265,6 +266,9 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	if(GetAsyncKeyState('Q') & 0x8000)
 		mCamera.Lift(-10.0f*dt);
 
+	flyCar = GetAsyncKeyState(VK_SPACE) & 0x8000;	
+		
+
 	if(GetAsyncKeyState('E') & 0x8000)
 		mCamera.Lift(10.0f*dt);
 
@@ -290,6 +294,17 @@ void ModelsGame::OnKeyboardInput(const GameTimer& gt)
 	// sun->NumFramesDirty = gNumFrameResources;
 // }
 
+void ModelsGame::UpdateObjects(const GameTimer& gt)
+{
+	if(!flyCar)
+		return;
+	std::shared_ptr<GameObject> car = AllGameObjects[0];
+	
+    car->LocalTransform.Position.x += gt.DeltaTime() * 10;
+
+	car->Ritem->World = car->LocalTransform.GetGlobalWorldMatrix();
+	car->Ritem->NumFramesDirty = 3;
+}
 
 
 void ModelsGame::AnimateMaterials(const GameTimer& gt)
@@ -322,6 +337,7 @@ void ModelsGame::UpdateObjectCBs(const GameTimer& gt)
 			ritem->NumFramesDirty--;
 		}
 	}
+	
 }
 
 void ModelsGame::UpdateMaterialBuffer(const GameTimer& gt)

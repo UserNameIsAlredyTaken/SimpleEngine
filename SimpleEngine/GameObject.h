@@ -34,6 +34,7 @@ struct Transform
     DirectX::XMFLOAT3 Scale;
 
     Transform(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scale);
+    XMFLOAT4X4 GetGlobalWorldMatrix();
 };
 
 class GameObject
@@ -41,18 +42,17 @@ class GameObject
 public:
     GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform);
     GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName);
-    
+
+    void AddChild(GameObject* child);    
+
+    Transform LocalTransform; //always relative to parent's
+    std::shared_ptr<RenderItem> Ritem;
     std::string GeometryName;
-
-    void AddChild(GameObject* child);
-
-    std::shared_ptr<RenderItem> Ritem;   
 
 private:
     GameObject* ParentGameObject;
-    std::vector<GameObject*> ChildrenGameOjects;
+    std::vector<GameObject*> ChildrenGameOjects;    
     
-    Transform LocalTransform; //always relative to parent's
 
     inline static int cbIndex = 0;
     
