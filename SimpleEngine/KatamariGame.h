@@ -3,8 +3,10 @@
 #include "FrameResource.h"
 #include "Game.h"
 #include "GameObject.h"
-#include "ShadowMap.h"
+#include "Common/ShadowMap.h"
 #include "Common/UploadBuffer.h"
+#include "Common/GeometryGenerator.h"
+#include "Components/BaseComponent.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -39,7 +41,7 @@ private:
     void AnimateMaterials(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateShadowTransform(const GameTimer& gt);
-    void UpdateObjects(const GameTimer& gt);
+    void UpdateGameObjects(const GameTimer& gt);
     void UpdateObjectCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
     void UpdateShadowPassCB(const GameTimer& gt);

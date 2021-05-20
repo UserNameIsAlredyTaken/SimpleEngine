@@ -45,10 +45,19 @@ GameObject(parent, mat, geo, subgeoName,
 
 void GameObject::Update(const GameTimer& gt)
 {
+    for(auto& component : Components)
+    {
+        component->Update(gt);
+    }
 }
 
 void GameObject::AddChild(GameObject* child)
 {
     ChildrenGameOjects.push_back(child);
+}
+
+void GameObject::AddComponent(std::shared_ptr<BaseComponent> component)
+{
+    Components.push_back(component);
 }
 

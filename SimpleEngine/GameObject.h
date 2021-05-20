@@ -3,6 +3,8 @@
 
 #include "FrameResource.h"
 #include "Game.h"
+#include "Components/BaseComponent.h"
+#include "Components/MoveComponent.h"
 
 using namespace DirectX;
 
@@ -47,6 +49,7 @@ public:
 
     void Update(const GameTimer& gt);
     void AddChild(GameObject* child);
+    void AddComponent(std::shared_ptr<BaseComponent> component);
 
     Transform LocalTransform; //always relative to parent's
     std::shared_ptr<RenderItem> Ritem;
@@ -54,7 +57,8 @@ public:
 
 private:
     GameObject* ParentGameObject;
-    std::vector<GameObject*> ChildrenGameOjects;    
+    std::vector<GameObject*> ChildrenGameOjects;
+    std::vector<std::shared_ptr<BaseComponent>> Components;
     
 
     inline static int cbIndex = 0;

@@ -1,6 +1,6 @@
 ﻿#include "KatamariGame.h"
 
-#include "Common/GeometryGenerator.h"
+
 
 const int gNumFrameResources = 3;
 
@@ -110,7 +110,7 @@ void KatamariGame::Update(const GameTimer& gt)
         CloseHandle(eventHandle);
     }
 
-	UpdateObjects(gt);
+	UpdateGameObjects(gt);
     UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
     UpdateMainPassCB(gt);
@@ -294,16 +294,20 @@ void KatamariGame::OnKeyboardInput(const GameTimer& gt)
 	// sun->NumFramesDirty = gNumFrameResources;
 // }
 
-void KatamariGame::UpdateObjects(const GameTimer& gt)
+void KatamariGame::UpdateGameObjects(const GameTimer& gt)
 {
-	if(!flyCar)
-		return;
-	std::shared_ptr<GameObject> car = AllGameObjects[0];
-	
-    car->LocalTransform.Position.x += gt.DeltaTime() * 10;
-
-	car->Ritem->World = car->LocalTransform.GetGlobalWorldMatrix();
-	car->Ritem->NumFramesDirty = 3;
+	for(auto& go : AllGameObjects)
+	{
+		go->Update(gt);
+	}
+	// if(!flyCar)
+	// 	return;
+	// std::shared_ptr<GameObject> car = AllGameObjects[0];
+	//
+ //    car->LocalTransform.Position.x += gt.DeltaTime() * 10;
+ //
+	// car->Ritem->World = car->LocalTransform.GetGlobalWorldMatrix();
+	// car->Ritem->NumFramesDirty = 3;
 }
 
 
@@ -767,9 +771,12 @@ void KatamariGame::BuildMaterials()
 
 void KatamariGame::BuildGameObjects()
 {	
-	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
-	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1");
+	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");	
 	auto debugQuad = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
+	
+	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1");
+	auto moveComponent = std::make_shared<MoveComponent>();
+	car->AddComponent(std::move(moveComponent));
 
 	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
 	RenderLayers[(int)RenderLayer::Opaque].push_back(car);
