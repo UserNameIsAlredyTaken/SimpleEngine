@@ -21,21 +21,20 @@ LocalTransform(transform)
     Ritem = std::move(ritem);
 }
 
-// GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName) :
-// GameObject(mat, geo, subgeoName,
-//     Transform(
-//         {0.0f, 0.0f, 0.0f},
-//         {0.0f, 0.0f, 0.0f},
-//         {1.0f, 1.0f, 1.0f})
-//         )
-// {
-// }
 
 void GameObject::Update(const GameTimer& gt)
 {
     for(auto& component : Components)
     {
         component->Update(gt);
+    }
+}
+
+void GameObject::Start()
+{
+    for(auto& component : Components)
+    {
+        component->Start();
     }
 }
 

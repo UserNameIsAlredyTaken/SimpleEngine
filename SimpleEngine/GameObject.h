@@ -5,7 +5,7 @@
 #include "Game.h"
 #include "Transform.h"
 #include "Components/BaseComponent.h"
-#include "Components/MoveComponent.h"
+#include "Components/InputComponent.h"
 
 
 using namespace DirectX;
@@ -42,9 +42,12 @@ public:
     // GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName);
 
     void Update(const GameTimer& gt);
+    void Start();
     void AddChild(GameObject* child);
     void SetParent(GameObject* parent);
     template <class T> void AddComponent();
+    // template <class T> T* GetComponent();
+    // InputComponent* GetComponent();
     void RefreshWorldMatrix();    
 
     Transform LocalTransform; //always relative to parent's
@@ -68,5 +71,26 @@ inline void GameObject::AddComponent()
     auto component = std::make_shared<T>(this);
     Components.push_back(std::move(component));
 }
+
+
+// template <class T>
+// T* GameObject::GetComponent()
+// {
+//     BaseComponent* foundComp = std::find_if(Components.begin(), Components.end(), [](BaseComponent* comp)
+//     {
+//         return dynamic_cast<T*>(comp) != NULL;
+//     })->get();
+//     return dynamic_cast<T*>(foundComp);
+// }
+
+
+// InputComponent* GameObject::GetComponent()
+// {
+//     BaseComponent* foundComp = std::find_if(Components.begin(), Components.end(), [](BaseComponent* comp)
+//     {
+//         return dynamic_cast<InputComponent*>(comp) != NULL;
+//     })->get();
+//     return dynamic_cast<InputComponent*>(foundComp);
+// }
 
 

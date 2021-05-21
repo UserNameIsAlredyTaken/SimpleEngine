@@ -8,6 +8,7 @@
 #include "Common/GeometryGenerator.h"
 #include "Components/BaseComponent.h"
 
+
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 
@@ -113,8 +114,8 @@ private:
 
     UINT mPassCbvOffset = 0;
 
-    float lightTheta = 1.25f*XM_PI;;
-    float lightPhi = XM_PIDIV2;
+    float lightTheta = 1.25f*XM_PI;
+    float lightPhi = 0.25f*XM_PI;
     float lightDistance = 2.0f;
 
     float lightRotationSpeed = 3.0f;

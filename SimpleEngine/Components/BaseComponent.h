@@ -12,7 +12,8 @@ protected:
 
 public:
     BaseComponent(GameObject* gameObject);
-    virtual void Update(const GameTimer& gt);    
+    virtual void Update(const GameTimer& gt);
+    virtual void Start();
 };
 
 inline BaseComponent::BaseComponent(GameObject* gameObject) : gameObject(gameObject)
@@ -22,4 +23,9 @@ inline BaseComponent::BaseComponent(GameObject* gameObject) : gameObject(gameObj
 inline void BaseComponent::Update(const GameTimer& gt)
 {
     printf("BaseComponentUpdate\n");
+}
+
+inline void BaseComponent::Start()
+{
+    printf("BaseComponentStart\n");
 }

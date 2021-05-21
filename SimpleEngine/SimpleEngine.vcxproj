@@ -554,7 +554,10 @@
       <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2\include;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Components\CameraComponent.cpp" />
+    <ClCompile Include="Components\InputComponent.cpp" />
     <ClCompile Include="Components\MoveComponent.cpp" />
+    <ClCompile Include="Components\RollComponent.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -847,7 +850,10 @@
     <ClInclude Include="Common\ShadowMap.h" />
     <ClInclude Include="Common\UploadBuffer.h" />
     <ClInclude Include="Components\BaseComponent.h" />
+    <ClInclude Include="Components\CameraComponent.h" />
+    <ClInclude Include="Components\InputComponent.h" />
     <ClInclude Include="Components\MoveComponent.h" />
+    <ClInclude Include="Components\RollComponent.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />

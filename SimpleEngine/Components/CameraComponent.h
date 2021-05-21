@@ -1,13 +1,10 @@
 ﻿#pragma once
-#include <string>
-
 #include "BaseComponent.h"
 
-
-class MoveComponent : public BaseComponent
+class CameraComponent : public BaseComponent
 {
 public:
-    MoveComponent(GameObject* gameObject);
+    CameraComponent(GameObject* gameObject);
     void Update(const GameTimer& gt) override;
     
 };

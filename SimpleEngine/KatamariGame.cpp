@@ -1,5 +1,5 @@
 ﻿#include "KatamariGame.h"
-
+#include "Components/MoveComponent.h"
 
 
 const int gNumFrameResources = 3;
@@ -231,23 +231,23 @@ void KatamariGame::OnKeyboardInput(const GameTimer& gt)
 	const float dt = gt.DeltaTime();
 
 	//controll light
-	if(GetAsyncKeyState(VK_LEFT) & 0x8000)
-		lightTheta -= lightRotationSpeed*dt;
-
-	if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		lightTheta += lightRotationSpeed*dt;
-
-	if(GetAsyncKeyState(VK_UP) & 0x8000)
-		lightPhi -= lightRotationSpeed*dt;
-
-	if(GetAsyncKeyState(VK_DOWN) & 0x8000)
-		lightPhi += lightRotationSpeed*dt;
-
-	if(GetAsyncKeyState(VK_OEM_PLUS) & 0x8000)
-		lightDistance += lightRotationSpeed*dt;
-
-	if(GetAsyncKeyState(VK_OEM_MINUS) & 0x8000)
-		lightDistance -= lightRotationSpeed*dt;
+	// if(GetAsyncKeyState(VK_LEFT) & 0x8000)
+	// 	lightTheta -= lightRotationSpeed*dt;
+	//
+	// if(GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	// 	lightTheta += lightRotationSpeed*dt;
+	//
+	// if(GetAsyncKeyState(VK_UP) & 0x8000)
+	// 	lightPhi -= lightRotationSpeed*dt;
+	//
+	// if(GetAsyncKeyState(VK_DOWN) & 0x8000)
+	// 	lightPhi += lightRotationSpeed*dt;
+	//
+	// if(GetAsyncKeyState(VK_OEM_PLUS) & 0x8000)
+	// 	lightDistance += lightRotationSpeed*dt;
+	//
+	// if(GetAsyncKeyState(VK_OEM_MINUS) & 0x8000)
+	// 	lightDistance -= lightRotationSpeed*dt;
 
 
 	//controll camera
@@ -765,7 +765,11 @@ void KatamariGame::BuildGameObjects()
 	teapod->AddComponent<MoveComponent>();
 	car->AddComponent<MoveComponent>();
 	// auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
-	
+
+	for(auto& go : AllGameObjects)
+	{
+		go->Start();		
+	}	
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {

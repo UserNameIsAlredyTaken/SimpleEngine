@@ -1,6 +1,6 @@
 ﻿#include "MoveComponent.h"
-
 #include "../GameObject.h"
+
 
 
 MoveComponent::MoveComponent(GameObject* gameObject) : BaseComponent(gameObject)
