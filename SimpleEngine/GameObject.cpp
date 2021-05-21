@@ -73,17 +73,16 @@ XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
 {
     //recursively calculates world matrix from parents chain
     XMMATRIX parentMatrix = ParentGameObject ? XMLoadFloat4x4(&ParentGameObject->GetGlobalWorldMatrix()) : XMLoadFloat4x4(&MathHelper::Identity4x4());
+
+    auto origin = XMVectorSet(0, 0, 0, 0);
+    auto scale = XMVectorSet(LocalTransform.GetScale().x, LocalTransform.GetScale().y, LocalTransform.GetScale().z, 0);
+    auto translation = XMVectorSet(LocalTransform.GetPosition().x, LocalTransform.GetPosition().y, LocalTransform.GetPosition().z, 0);
+    auto rotation = XMQuaternionRotationRollPitchYaw(LocalTransform.GetRotation().x, LocalTransform.GetRotation().y, LocalTransform.GetRotation().z);
+    
+    auto localMatrix = XMMatrixAffineTransformation(scale, origin, rotation, translation);
     
     XMFLOAT4X4 result;
-    //calclate world matrix from position, rotation and scale
-    XMStoreFloat4x4(&result,
-        XMMatrixTranslation(LocalTransform.GetPosition().x, LocalTransform.GetPosition().y, LocalTransform.GetPosition().z) *
-        XMMatrixRotationX(LocalTransform.GetRotation().x) *
-        XMMatrixRotationY(LocalTransform.GetRotation().y) *
-        XMMatrixRotationZ(LocalTransform.GetRotation().z) *
-        XMMatrixScaling(LocalTransform.GetScale().x, LocalTransform.GetScale().y, LocalTransform.GetScale().z) *
-        parentMatrix
-        );
+    XMStoreFloat4x4(&result,localMatrix * parentMatrix);
     return result;
 }
 

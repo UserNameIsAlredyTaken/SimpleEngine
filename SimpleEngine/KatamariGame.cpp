@@ -754,11 +754,16 @@ void KatamariGame::BuildGameObjects()
 	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);
 		
 	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({3.0f, 0.0f, 0.0f}));
-	car->AddComponent<MoveComponent>();
 	
-	auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform({0.0f, 1.0f, 0.0f}));
+	
+	auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
+		{2.0f, 2.0f, 2.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.5f, 0.5f, 0.5f}));
 	car->AddChild(teapod);
 
+	teapod->AddComponent<MoveComponent>();
+	car->AddComponent<MoveComponent>();
 	// auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
 	
 }

@@ -6,12 +6,12 @@ class Transform
 {
 public:
     Transform(XMFLOAT3 pos = {0, 0, 0}, XMFLOAT3 rot = {0, 0, 0}, XMFLOAT3 scale = {1, 1, 1});
-    // Transform(XMFLOAT3 pos);
-    // Transform();
+    
 
     XMFLOAT3 GetPosition();
     XMFLOAT3 GetRotation();
     XMFLOAT3 GetScale();
+
     
     void SetPosition(XMFLOAT3 pos);
     void SetRotation(XMFLOAT3 rot);
@@ -19,6 +19,6 @@ public:
 
 private:
     XMFLOAT3 Position;
-    XMFLOAT3 Rotation;
+    XMFLOAT3 Rotation; //Radians
     XMFLOAT3 Scale;    
 };
