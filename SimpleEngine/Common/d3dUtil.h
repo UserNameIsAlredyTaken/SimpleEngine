@@ -31,6 +31,11 @@
 
 extern const int gNumFrameResources;
 
+template <class T> inline bool CheckVectorContains(std::vector<T*> vector, T* object)
+{
+    return std::find(vector.begin(), vector.end(), object) == vector.end();
+}
+
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
 {
     if(obj)

@@ -750,14 +750,17 @@ void KatamariGame::BuildMaterials()
 
 void KatamariGame::BuildGameObjects()
 {	
-	auto grid = std::make_shared<GameObject>(nullptr, mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");	
-	auto debugQuad = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
+	auto grid = std::make_shared<GameObject>(/*nullptr, */mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");	
+	auto debugQuad = std::make_shared<GameObject>(/*nullptr, */mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
 	
 	
-	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({0.0f, 1.0f, 0.0f}));
+	auto car = std::make_shared<GameObject>(/*nullptr, */mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({0.0f, 1.0f, 0.0f}));
 	car->AddComponent<MoveComponent>();
 
-	auto teapod = std::make_shared<GameObject>(car.get(), mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform({0.0f, 1.0f, 0.0f}));
+	auto teapod = std::make_shared<GameObject>(/*car.get(), */mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform({0.0f, 1.0f, 0.0f}));
+
+	car->AddChild(teapod.get());
+	teapod->SetParent(car.get());
 
 	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
 	RenderLayers[(int)RenderLayer::Opaque].push_back(car);

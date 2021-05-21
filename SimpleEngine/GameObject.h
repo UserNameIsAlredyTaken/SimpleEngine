@@ -7,6 +7,7 @@
 #include "Components/BaseComponent.h"
 #include "Components/MoveComponent.h"
 
+
 using namespace DirectX;
 
 struct RenderItem
@@ -36,11 +37,12 @@ struct RenderItem
 class GameObject
 {
 public:
-    GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform);
-    GameObject(GameObject* parent, Material* mat, MeshGeometry* geo, std::string subgeoName);
+    GameObject(/*GameObject* parent, */Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform);
+    GameObject(/*GameObject* parent, */Material* mat, MeshGeometry* geo, std::string subgeoName);
 
     void Update(const GameTimer& gt);
     void AddChild(GameObject* child);
+    void SetParent(GameObject* parent);
     template <class T> void AddComponent();
     void RefreshWorldMatrix();    
 
@@ -52,8 +54,7 @@ private:
     GameObject* ParentGameObject;
     std::vector<GameObject*> ChildrenGameOjects;
     std::vector<std::shared_ptr<BaseComponent>> Components;
-    XMFLOAT4X4 GetGlobalWorldMatrix();
-    
+    XMFLOAT4X4 GetGlobalWorldMatrix();    
 
     inline static int cbIndex = 0;
     
