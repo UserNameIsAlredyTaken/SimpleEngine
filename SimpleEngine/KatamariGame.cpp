@@ -580,8 +580,8 @@ void KatamariGame::BuildShapeGeometry()
 	meshesWithNames.push_back(std::make_pair("grid",grid));
 	GeometryGenerator::MeshData quad = geoGen.CreateQuad(0.0f, 1.0f, 1.0f, 1.0f, 0.0f);
 	meshesWithNames.push_back(std::make_pair("quad",quad));
-	// GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-	// meshes.push_back(sphere);
+	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(1.0f, 20, 20);
+	meshesWithNames.push_back(std::make_pair("sphere",sphere));
 	// GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 	// meshes.push_back(cylinder);
 
@@ -749,27 +749,17 @@ void KatamariGame::BuildMaterials()
 }
 
 void KatamariGame::BuildGameObjects()
-{	
-	auto grid = std::make_shared<GameObject>(/*nullptr, */mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");	
-	auto debugQuad = std::make_shared<GameObject>(/*nullptr, */mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "quad");
-	
-	
-	auto car = std::make_shared<GameObject>(/*nullptr, */mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({0.0f, 1.0f, 0.0f}));
+{
+	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
+	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);
+		
+	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({3.0f, 0.0f, 0.0f}));
 	car->AddComponent<MoveComponent>();
+	
+	auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform({0.0f, 1.0f, 0.0f}));
+	car->AddChild(teapod);
 
-	auto teapod = std::make_shared<GameObject>(/*car.get(), */mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform({0.0f, 1.0f, 0.0f}));
-
-	car->AddChild(teapod.get());
-	teapod->SetParent(car.get());
-
-	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
-	RenderLayers[(int)RenderLayer::Opaque].push_back(car);
-	RenderLayers[(int)RenderLayer::Opaque].push_back(teapod);
-	RenderLayers[(int)RenderLayer::Debug].push_back(debugQuad);
-	AllGameObjects.push_back(std::move(grid));
-	AllGameObjects.push_back(std::move(car));
-	AllGameObjects.push_back(std::move(teapod));
-	AllGameObjects.push_back(std::move(debugQuad));
+	// auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
 	
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
@@ -959,9 +949,20 @@ void KatamariGame::DrawSceneToShadowMap()
 
 	mCommandList->SetPipelineState(mPSOs["shadow_opaque"].Get());
 
-	DrawGameObjects(mCommandList.Get(), RenderLayers[(int)RenderLayer::Opaque]/*mRitemLayer[(int)RenderLayer::Opaque]*/);
+	DrawGameObjects(mCommandList.Get(), RenderLayers[(int)RenderLayer::Opaque]);
 
 	// Change back to GENERIC_READ so we can read the texture in a shader.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
+
+GameObject* KatamariGame::AddGameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform,
+	RenderLayer layer)
+{
+	auto go = std::make_shared<GameObject>(mat, geo, subgeoName, transform);
+	RenderLayers[(int)layer].push_back(go);
+	AllGameObjects.push_back(std::move(go));
+	return AllGameObjects.back().get();
+}
+
+

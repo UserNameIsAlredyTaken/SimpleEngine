@@ -2,7 +2,7 @@
 
 
 
-GameObject::GameObject(/*GameObject* parent, */Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform) :
+GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform) :
 ParentGameObject(nullptr),
 GeometryName(subgeoName),
 LocalTransform(transform)
@@ -19,22 +19,17 @@ LocalTransform(transform)
     ritem->BaseVertexLocation = geo->DrawArgs[subgeoName].BaseVertexLocation;
 
     Ritem = std::move(ritem);
-
-    //add self to parents child list
-    // if(parent)
-    //     parent->AddChild(this);
-    
 }
 
-GameObject::GameObject(/*GameObject* parent, */Material* mat, MeshGeometry* geo, std::string subgeoName) :
-GameObject(/*parent, */mat, geo, subgeoName,
-    Transform(
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {1.0f, 1.0f, 1.0f})
-        )
-{
-}
+// GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName) :
+// GameObject(mat, geo, subgeoName,
+//     Transform(
+//         {0.0f, 0.0f, 0.0f},
+//         {0.0f, 0.0f, 0.0f},
+//         {1.0f, 1.0f, 1.0f})
+//         )
+// {
+// }
 
 void GameObject::Update(const GameTimer& gt)
 {

@@ -7,9 +7,13 @@ Scale(scale)
 {
 }
 
-Transform::Transform(XMFLOAT3 pos) : Transform(pos, {0, 0, 0}, {1, 1, 1})
-{    
-}
+// Transform::Transform(XMFLOAT3 pos) : Transform(pos, {0, 0, 0}, {1, 1, 1})
+// {    
+// }
+//
+// Transform::Transform() : Transform({0, 0, 0}, {0, 0, 0}, {1, 1, 1})
+// {
+// }
 
 XMFLOAT3 Transform::GetPosition()
 {

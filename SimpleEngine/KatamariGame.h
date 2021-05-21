@@ -62,6 +62,8 @@ private:
     void DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems);
     void DrawSceneToShadowMap();
 
+    GameObject* AddGameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform = Transform(), RenderLayer layer = RenderLayer::Opaque);
+
     std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 
     std::vector<std::unique_ptr<FrameResource>> mFrameResources;

@@ -37,8 +37,9 @@ struct RenderItem
 class GameObject
 {
 public:
-    GameObject(/*GameObject* parent, */Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform);
-    GameObject(/*GameObject* parent, */Material* mat, MeshGeometry* geo, std::string subgeoName);
+    GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform = Transform());
+    
+    // GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName);
 
     void Update(const GameTimer& gt);
     void AddChild(GameObject* child);

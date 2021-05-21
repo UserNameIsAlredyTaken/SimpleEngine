@@ -5,8 +5,9 @@ using namespace DirectX;
 class Transform
 {
 public:
-    Transform(XMFLOAT3 pos, XMFLOAT3 rot, XMFLOAT3 scale);
-    Transform(XMFLOAT3 pos);
+    Transform(XMFLOAT3 pos = {0, 0, 0}, XMFLOAT3 rot = {0, 0, 0}, XMFLOAT3 scale = {1, 1, 1});
+    // Transform(XMFLOAT3 pos);
+    // Transform();
 
     XMFLOAT3 GetPosition();
     XMFLOAT3 GetRotation();
