@@ -755,10 +755,9 @@ void KatamariGame::BuildGameObjects()
 	
 	
 	auto car = std::make_shared<GameObject>(nullptr, mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({0.0f, 1.0f, 0.0f}));
-	auto moveComponent = std::make_shared<MoveComponent>(car.get());
-	car->AddComponent(std::move(moveComponent));
+	car->AddComponent<MoveComponent>();
 
-	auto teapod = std::make_shared<GameObject>(car.get(), mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot");
+	auto teapod = std::make_shared<GameObject>(car.get(), mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform({0.0f, 1.0f, 0.0f}));
 
 	RenderLayers[(int)RenderLayer::Opaque].push_back(grid);
 	RenderLayers[(int)RenderLayer::Opaque].push_back(car);

@@ -41,7 +41,7 @@ public:
 
     void Update(const GameTimer& gt);
     void AddChild(GameObject* child);
-    void AddComponent(std::shared_ptr<BaseComponent> component);
+    template <class T> void AddComponent();
     void RefreshWorldMatrix();    
 
     Transform LocalTransform; //always relative to parent's
@@ -58,5 +58,13 @@ private:
     inline static int cbIndex = 0;
     
 };
+
+template <class T>
+inline void GameObject::AddComponent()
+{
+    static_assert(std::is_base_of<BaseComponent, T>::value, "T must derive from BaseComponent");
+    auto component = std::make_shared<T>(this);
+    Components.push_back(std::move(component));
+}
 
 

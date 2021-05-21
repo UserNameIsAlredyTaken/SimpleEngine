@@ -49,10 +49,7 @@ void GameObject::AddChild(GameObject* child)
     ChildrenGameOjects.push_back(child);
 }
 
-void GameObject::AddComponent(std::shared_ptr<BaseComponent> component)
-{
-    Components.push_back(component);
-}
+
 
 
 void GameObject::RefreshWorldMatrix()
