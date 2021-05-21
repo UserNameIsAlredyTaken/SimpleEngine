@@ -76,11 +76,17 @@ inline void GameObject::AddComponent()
 template <class T>
 T* GameObject::GetComponent()
 {
-    BaseComponent* foundComp = std::find_if(Components.begin(), Components.end(), [](std::shared_ptr<BaseComponent> comp)
+    auto foundComp = std::find_if(Components.begin(), Components.end(), [](std::shared_ptr<BaseComponent> comp)
     {
         return dynamic_cast<T*>(comp.get()) != NULL;
-    })->get();
-    return dynamic_cast<T*>(foundComp);
+    });
+    
+    if(foundComp == Components.end())//didn't find
+    {
+        printf("There is no such Component!\n");
+        return nullptr;
+    }
+    return dynamic_cast<T*>(foundComp->get());
 }
 
 

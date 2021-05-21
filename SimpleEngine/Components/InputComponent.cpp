@@ -10,15 +10,17 @@ void InputComponent::Update(const GameTimer& gt)
 {
     if(GetAsyncKeyState(forwardKey) & 0x8000)
     	forwardValue = 1;
-    
-    if(GetAsyncKeyState(backKey) & 0x8000)
+    else if(GetAsyncKeyState(backKey) & 0x8000)  
     	forwardValue = -1;
-    
+    else
+        forwardValue = 0;
+
     if(GetAsyncKeyState(rightKey) & 0x8000)
-    	rightValue = 1;
-    
-    if(GetAsyncKeyState(leftKey) & 0x8000)
         rightValue = 1;
+    else if(GetAsyncKeyState(leftKey) & 0x8000)
+        rightValue = -1;
+    else
+        rightValue = 0;
 }
 
 float InputComponent::GetForward()

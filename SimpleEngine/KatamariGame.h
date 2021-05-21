@@ -43,6 +43,7 @@ private:
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateShadowTransform(const GameTimer& gt);
     void UpdateGameObjects(const GameTimer& gt);
+    void StartGameObjects();
     void UpdateObjectCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
     void UpdateShadowPassCB(const GameTimer& gt);

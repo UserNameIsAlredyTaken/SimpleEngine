@@ -60,6 +60,8 @@ bool KatamariGame::Initialize()
     // Wait until initialization is complete.
     FlushCommandQueue();
 
+	StartGameObjects();
+	
     return true;
 }
 
@@ -290,6 +292,14 @@ void KatamariGame::UpdateGameObjects(const GameTimer& gt)
 	for(auto& go : AllGameObjects)
 	{
 		go->Update(gt);
+	}
+}
+
+void KatamariGame::StartGameObjects()
+{	
+	for(auto& go : AllGameObjects)
+	{
+		go->Start();		
 	}
 }
 
@@ -763,16 +773,11 @@ void KatamariGame::BuildGameObjects()
 	car->AddChild(teapod);
 
 	teapod->AddComponent<MoveComponent>();
-	car->AddComponent<MoveComponent>();
-	car->AddComponent<InputComponent>();
-	car->AddComponent<RollComponent>();
+	car->AddComponent<MoveComponent>();	
 	
-	// auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
-
-	for(auto& go : AllGameObjects)
-	{
-		go->Start();		
-	}	
+	auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
+	ball->AddComponent<InputComponent>();
+	ball->AddComponent<RollComponent>();
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {
