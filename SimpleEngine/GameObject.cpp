@@ -1,5 +1,5 @@
-﻿#include "GameObject.h"
-
+﻿#pragma once
+#include "GameObject.h"
 
 
 GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform) :

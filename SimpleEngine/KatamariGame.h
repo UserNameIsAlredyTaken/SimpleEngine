@@ -2,11 +2,11 @@
 #include "Common/Camera.h"
 #include "FrameResource.h"
 #include "Game.h"
-#include "GameObject.h"
 #include "Common/ShadowMap.h"
 #include "Common/UploadBuffer.h"
 #include "Common/GeometryGenerator.h"
 #include "Components/BaseComponent.h"
+#include "Transform.h"
 
 
 using Microsoft::WRL::ComPtr;

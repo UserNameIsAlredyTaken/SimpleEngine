@@ -1,4 +1,5 @@
-﻿#include "InputComponent.h"
+﻿#pragma once
+#include "InputComponent.h"
 #include "../GameObject.h"
 
 InputComponent::InputComponent(GameObject* gameObject) : BaseComponent(gameObject)

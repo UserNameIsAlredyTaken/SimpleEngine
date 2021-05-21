@@ -1,11 +1,13 @@
-﻿#include <DirectXMath.h>
+﻿#pragma once
+#include <DirectXMath.h>
 #include <vector>
-
 #include "FrameResource.h"
 #include "Game.h"
 #include "Transform.h"
 #include "Components/BaseComponent.h"
-#include "Components/InputComponent.h"
+#include "Components/MoveComponent.h"
+#include "Components/RollComponent.h"
+// #include "Components/InputComponent.h"
 
 
 using namespace DirectX;
@@ -39,15 +41,12 @@ class GameObject
 public:
     GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform = Transform());
     
-    // GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName);
-
     void Update(const GameTimer& gt);
     void Start();
     void AddChild(GameObject* child);
     void SetParent(GameObject* parent);
     template <class T> void AddComponent();
-    // template <class T> T* GetComponent();
-    // InputComponent* GetComponent();
+    template <class T> T* GetComponent();
     void RefreshWorldMatrix();    
 
     Transform LocalTransform; //always relative to parent's
@@ -64,6 +63,7 @@ private:
     
 };
 
+
 template <class T>
 inline void GameObject::AddComponent()
 {
@@ -73,24 +73,14 @@ inline void GameObject::AddComponent()
 }
 
 
-// template <class T>
-// T* GameObject::GetComponent()
-// {
-//     BaseComponent* foundComp = std::find_if(Components.begin(), Components.end(), [](BaseComponent* comp)
-//     {
-//         return dynamic_cast<T*>(comp) != NULL;
-//     })->get();
-//     return dynamic_cast<T*>(foundComp);
-// }
-
-
-// InputComponent* GameObject::GetComponent()
-// {
-//     BaseComponent* foundComp = std::find_if(Components.begin(), Components.end(), [](BaseComponent* comp)
-//     {
-//         return dynamic_cast<InputComponent*>(comp) != NULL;
-//     })->get();
-//     return dynamic_cast<InputComponent*>(foundComp);
-// }
+template <class T>
+T* GameObject::GetComponent()
+{
+    BaseComponent* foundComp = std::find_if(Components.begin(), Components.end(), [](std::shared_ptr<BaseComponent> comp)
+    {
+        return dynamic_cast<T*>(comp.get()) != NULL;
+    })->get();
+    return dynamic_cast<T*>(foundComp);
+}
 
 

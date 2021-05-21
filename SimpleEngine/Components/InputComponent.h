@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <string>
-
 #include "BaseComponent.h"
 #include "../Game.h"
 
@@ -19,6 +18,8 @@ private:
     int backKey = VK_DOWN;
     int leftKey = VK_LEFT;
     int rightKey = VK_RIGHT;
+
+    
 
     float forwardValue = 0;
     float rightValue = 0;

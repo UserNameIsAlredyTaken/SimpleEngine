@@ -2,7 +2,7 @@
 #include "BaseComponent.h"
 #include "InputComponent.h"
 
-class RollComponent : BaseComponent
+class RollComponent : public BaseComponent
 {
 private:
     InputComponent* inputManager;

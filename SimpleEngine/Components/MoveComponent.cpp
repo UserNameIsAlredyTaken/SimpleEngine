@@ -1,4 +1,5 @@
-﻿#include "MoveComponent.h"
+﻿#pragma once
+#include "MoveComponent.h"
 #include "../GameObject.h"
 
 
@@ -17,6 +18,6 @@ void MoveComponent::Update(const GameTimer& gt)
     
     XMFLOAT3 oldRot = gameObject->LocalTransform.GetRotation();
     gameObject->LocalTransform.SetRotation({oldRot.x, oldRot.y + gt.DeltaTime() * 2, oldRot.z});
-
+    
     gameObject->RefreshWorldMatrix();    
 }

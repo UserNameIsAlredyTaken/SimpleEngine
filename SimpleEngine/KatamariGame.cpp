@@ -1,5 +1,8 @@
 ﻿#include "KatamariGame.h"
 #include "Components/MoveComponent.h"
+#include "GameObject.h"
+#include "Components/InputComponent.h"
+#include "Components/RollComponent.h"
 
 
 const int gNumFrameResources = 3;
@@ -751,11 +754,8 @@ void KatamariGame::BuildMaterials()
 void KatamariGame::BuildGameObjects()
 {
 	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
-	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);
-		
-	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({3.0f, 0.0f, 0.0f}));
-	
-	
+	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);		
+	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({3.0f, 0.0f, 0.0f}));		
 	auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
 		{2.0f, 2.0f, 2.0f},
 		{0.0f, 0.0f, 0.0f},
@@ -764,6 +764,9 @@ void KatamariGame::BuildGameObjects()
 
 	teapod->AddComponent<MoveComponent>();
 	car->AddComponent<MoveComponent>();
+	car->AddComponent<InputComponent>();
+	car->AddComponent<RollComponent>();
+	
 	// auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
 
 	for(auto& go : AllGameObjects)

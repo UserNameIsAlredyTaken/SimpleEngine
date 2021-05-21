@@ -1,4 +1,5 @@
-﻿#include "RollComponent.h"
+﻿#pragma once
+#include "RollComponent.h"
 #include "../GameObject.h"
 
 RollComponent::RollComponent(GameObject* gameObject) : BaseComponent(gameObject)
@@ -7,8 +8,7 @@ RollComponent::RollComponent(GameObject* gameObject) : BaseComponent(gameObject)
 
 void RollComponent::Start()
 {
-    // inputManager = gameObject->GetComponent<InputComponent>();
-    // inputManager = gameObject->GetComponent();
+    inputManager = gameObject->GetComponent<InputComponent>();
 }
 
 void RollComponent::Update(const GameTimer& gt)
