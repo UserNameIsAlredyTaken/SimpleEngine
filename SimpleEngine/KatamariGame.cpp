@@ -32,8 +32,10 @@ bool KatamariGame::Initialize()
 
     // Reset the command list to prep for initialization commands.
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
-
-	mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+	mCamera.LookAt(
+		{-20.0f, 15.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 1.0f, 0.0f, 0.0f});
 
 	mShadowMap = std::make_unique<ShadowMap>(
 		md3dDevice.Get(), 2048, 2048);
@@ -765,7 +767,7 @@ void KatamariGame::BuildGameObjects()
 {
 	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
 	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);		
-	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({3.0f, 0.0f, 0.0f}));		
+	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({4.0f, 0.0f, 10.0f}));		
 	auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
 		{2.0f, 2.0f, 2.0f},
 		{0.0f, 0.0f, 0.0f},
@@ -778,6 +780,14 @@ void KatamariGame::BuildGameObjects()
 	auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
 	ball->AddComponent<InputComponent>();
 	ball->AddComponent<RollComponent>();
+	auto ball1 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
+		{4.0f, 0.5f, -3.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.5f, 0.5f, 0.5f}));
+	auto ball2 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
+		{-8.0f, 0.5f, 2.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.5f, 0.5f, 0.5f}));
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {

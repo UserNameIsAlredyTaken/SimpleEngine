@@ -13,6 +13,12 @@ void RollComponent::Start()
 
 void RollComponent::Update(const GameTimer& gt)
 {
-    if(inputManager->GetForward())
-        printf("FORWARD!!!\n");
+    
+    XMFLOAT3 oldPos = gameObject->LocalTransform.GetPosition();
+    gameObject->LocalTransform.SetPosition({
+        oldPos.x + inputManager->GetForward() * gt.DeltaTime() * rollSpeed,
+        oldPos.y,
+        oldPos.z - inputManager->GetRight() * gt.DeltaTime() * rollSpeed});
+    
+    gameObject->RefreshWorldMatrix();      
 }

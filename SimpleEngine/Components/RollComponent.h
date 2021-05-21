@@ -6,6 +6,8 @@ class RollComponent : public BaseComponent
 {
 private:
     InputComponent* inputManager;
+
+    float rollSpeed = 4;
     
 public:
     RollComponent(GameObject* gameObject);
