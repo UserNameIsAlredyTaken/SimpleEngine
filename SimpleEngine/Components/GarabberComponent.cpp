@@ -9,3 +9,7 @@ void GarabberComponent::Start()
 {
     collider = gameObject->GetComponent<ColliderComponent>();
 }
+
+void GarabberComponent::Update(const GameTimer& gt)
+{
+}

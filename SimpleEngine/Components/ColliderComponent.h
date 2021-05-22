@@ -3,15 +3,24 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/signals2.hpp>
 
+
 class ColliderComponent : public BaseComponent
 {
 private:
     float radius = 1;
     
+    static std::vector<ColliderComponent*> Colliders; //static vector of all colliders
+    
 public:
     ColliderComponent(GameObject* gameObject);
     void Start() override;
     void Update(const GameTimer& gt) override;
-    //boost::signal<void()> OnPressed;
-    boost::signals2<void()> OnPressed;
+    
+    static void UpdateCollisionSystem();
+    
+    boost::signals2::signal<void()> OnCollide;
+
+    void V();
 };
+
+

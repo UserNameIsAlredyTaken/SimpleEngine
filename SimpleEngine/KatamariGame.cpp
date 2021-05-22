@@ -1,6 +1,8 @@
 ﻿#include "KatamariGame.h"
+
 #include "Components/MoveComponent.h"
 #include "GameObject.h"
+#include "Components/ColliderComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/RollComponent.h"
 
@@ -118,6 +120,7 @@ void KatamariGame::Update(const GameTimer& gt)
     }
 
 	UpdateGameObjects(gt);
+	ColliderComponent::UpdateCollisionSystem();
     UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
     UpdateMainPassCB(gt);
@@ -788,6 +791,10 @@ void KatamariGame::BuildGameObjects()
 		{-8.0f, 0.5f, 2.0f},
 		{0.0f, 0.0f, 0.0f},
 		{0.5f, 0.5f, 0.5f}));
+
+	ball->AddComponent<ColliderComponent>();
+	ball1->AddComponent<ColliderComponent>();
+	ball2->AddComponent<ColliderComponent>();
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {
