@@ -14,6 +14,8 @@ public:
     BaseComponent(GameObject* gameObject);
     virtual void Update(const GameTimer& gt);
     virtual void Start();
+
+    GameObject* GetGameObject();
 };
 
 inline BaseComponent::BaseComponent(GameObject* gameObject) : gameObject(gameObject)
@@ -28,4 +30,9 @@ inline void BaseComponent::Update(const GameTimer& gt)
 inline void BaseComponent::Start()
 {
     printf("BaseComponentStart\n");
+}
+
+inline GameObject* BaseComponent::GetGameObject()
+{
+    return gameObject;
 }

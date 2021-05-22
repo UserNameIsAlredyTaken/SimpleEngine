@@ -18,9 +18,7 @@ public:
     
     static void UpdateCollisionSystem();
     
-    boost::signals2::signal<void()> OnCollide;
-
-    void V();
+    boost::signals2::signal<void(ColliderComponent*)> OnCollide;
 };
 
 

@@ -11,11 +11,14 @@ GrabberComponent::GrabberComponent(GameObject* gameObject) : BaseComponent(gameO
 void GrabberComponent::Start()
 {
     collider = gameObject->GetComponent<ColliderComponent>();
-    collider->OnCollide.connect(boost::bind(&GrabberComponent::Grabb, this));
+    // collider->OnCollide.connect(boost::bind(&GrabberComponent::Grabb, this));
+    // collider->OnCollide.connect(this->Grabb);
+    collider->OnCollide.connect(boost::bind(&GrabberComponent::Grabb, this, boost::placeholders::_1));
 }
 
-void GrabberComponent::Grabb()
+void GrabberComponent::Grabb(ColliderComponent* other)
 {
+    gameObject->AddChild(other->GetGameObject());
     printf("grab!\n");
 }
 

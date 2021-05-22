@@ -7,7 +7,7 @@ class GrabberComponent : public BaseComponent
 private:
     ColliderComponent* collider;
 
-    void Grabb();
+    void Grabb(ColliderComponent* other);
 public:
     GrabberComponent(GameObject* gameObject);
     void Start() override;

@@ -31,8 +31,8 @@ void ColliderComponent::UpdateCollisionSystem()
              
              if(distance <= collider1->radius + collider2->radius)
              {
-                 collider1->OnCollide();
-                 collider2->OnCollide();                 
+                 collider1->OnCollide(collider2);
+                 collider2->OnCollide(collider1);                 
              }
          }        
      }
