@@ -79,6 +79,13 @@ XMVECTOR GameObject::GetWorldPosition()
     return trans;
 }
 
+XMVECTOR GameObject::GetWorldScale()
+{
+    XMVECTOR scale, rot_quat, trans;
+    XMMatrixDecompose(&scale, &rot_quat, &trans, XMLoadFloat4x4(&Ritem->World));
+    return scale;
+}
+
 
 XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
 {

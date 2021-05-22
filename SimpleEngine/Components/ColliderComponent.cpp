@@ -32,8 +32,11 @@ void ColliderComponent::UpdateCollisionSystem()
              XMFLOAT4 distanceVector; // distance is replicated to each element
              XMStoreFloat4(&distanceVector, XMVector3Length(collider1->gameObject->GetWorldPosition() - collider2->gameObject->GetWorldPosition()));
              float distance = distanceVector.x;
+
+            float collider1Radius = collider1->radius * XMVectorGetX(collider1->GetGameObject()->GetWorldScale()); //CHECKS ONLY X COORDINATE!!
+            float collider2Radius = collider2->radius * XMVectorGetX(collider2->GetGameObject()->GetWorldScale()); //CHECKS ONLY X COORDINATE!!
              
-             if(distance <= collider1->radius + collider2->radius)
+             if(distance <= collider1Radius + collider2Radius)
              {
                  collider1->OnCollide(collider2);
                  collider2->OnCollide(collider1);                 

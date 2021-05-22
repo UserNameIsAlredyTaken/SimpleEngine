@@ -54,6 +54,7 @@ public:
     std::string GeometryName;
 
     XMVECTOR GetWorldPosition();
+    XMVECTOR GetWorldScale();
     std::string GetName(){
         return Name;
     };

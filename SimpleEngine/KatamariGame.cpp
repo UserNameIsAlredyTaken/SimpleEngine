@@ -785,7 +785,7 @@ void KatamariGame::BuildGameObjects()
 	auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
 		{0.0f, 0.0f, 0.0f},
 		{0.0f, 0.0f, 0},
-		{1.0f, 1.0f, 1.0f}));
+		{2.0f, 2.0f, 2.0f}));
 	ball->AddComponent<InputComponent>();
 	ball->AddComponent<RollComponent>();
 	ball->AddComponent<ColliderComponent>();
