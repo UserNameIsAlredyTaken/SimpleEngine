@@ -55,6 +55,7 @@ public:
 
     XMVECTOR GetWorldPosition();
     XMVECTOR GetWorldScale();
+    // XMVECTOR GetWorldUp();
     std::string GetName(){
         return Name;
     };

@@ -770,7 +770,7 @@ void KatamariGame::BuildMaterials()
 
 void KatamariGame::BuildGameObjects()
 {
-	// AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
+	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
 	// AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);		
 	// auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({4.0f, 0.0f, 10.0f}));		
 	// auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
@@ -783,20 +783,25 @@ void KatamariGame::BuildGameObjects()
 	// car->AddComponent<MoveComponent>();	
 	
 	auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
-		{0.0f, 0.0f, 0.0f},
+		{0.0f, 2.0f, 0.0f},
 		{0.0f, 0.0f, 0},
 		{2.0f, 2.0f, 2.0f}));
 	ball->AddComponent<InputComponent>();
 	ball->AddComponent<RollComponent>();
 	ball->AddComponent<ColliderComponent>();
 	ball->AddComponent<GrabberComponent>();
-	ball->AddComponent<MoveComponent>();
 	
 	auto ball1 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
-		{4.0f, 0.0f, -4.0f},
+		{4.0f, 1.0f, -4.0f},
 		{0.0f, 0.0f, 0.0f},
 		{1.0f, 1.0f, 1.0f}));	
 	ball1->AddComponent<ColliderComponent>();
+
+	// auto ball2 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
+	// 	{-4.0f, 1.0f, -4.0f},
+	// 	{0.0f, 0.0f, 0.0f},
+	// 	{1.0f, 1.0f, 1.0f}));	
+	// ball2->AddComponent<ColliderComponent>();
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {

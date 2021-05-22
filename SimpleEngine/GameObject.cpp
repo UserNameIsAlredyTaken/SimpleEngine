@@ -86,6 +86,11 @@ XMVECTOR GameObject::GetWorldScale()
     return scale;
 }
 
+// XMVECTOR GameObject::GetWorldUp()
+// {
+//     return XMVector3TransformNormal(XMVectorSet(1,0,0, 0), XMMatrixRotationRollPitchYawFromVector(GetWorldRotation()));
+// }
+
 
 XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
 {
