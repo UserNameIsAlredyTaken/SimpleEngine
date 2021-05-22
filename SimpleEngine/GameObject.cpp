@@ -19,6 +19,8 @@ LocalTransform(transform)
     ritem->BaseVertexLocation = geo->DrawArgs[subgeoName].BaseVertexLocation;
 
     Ritem = std::move(ritem);
+
+    LocalTransform.SetOwner(this);
 }
 
 
@@ -70,20 +72,6 @@ void GameObject::RefreshWorldMatrix()
 
     for(auto& child : ChildrenGameOjects)
         child->RefreshWorldMatrix();
-}
-
-XMVECTOR GameObject::GetWorldPosition()
-{
-    XMVECTOR scale, rot_quat, trans;
-    XMMatrixDecompose(&scale, &rot_quat, &trans, XMLoadFloat4x4(&Ritem->World));
-    return trans;
-}
-
-XMVECTOR GameObject::GetWorldScale()
-{
-    XMVECTOR scale, rot_quat, trans;
-    XMMatrixDecompose(&scale, &rot_quat, &trans, XMLoadFloat4x4(&Ritem->World));
-    return scale;
 }
 
 // XMVECTOR GameObject::GetWorldUp()

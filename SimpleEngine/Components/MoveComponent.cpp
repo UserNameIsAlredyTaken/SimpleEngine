@@ -15,9 +15,7 @@ void MoveComponent::Update(const GameTimer& gt)
     
     // XMFLOAT3 oldScale = gameObject->LocalTransform.GetScale();
     // gameObject->LocalTransform.SetScale({oldScale.x + gt.DeltaTime() * 0.05f, oldScale.y  + gt.DeltaTime() * 0.05f, oldScale.z + gt.DeltaTime() * 0.05f});
-    
+
     XMFLOAT3 oldRot = gameObject->LocalTransform.GetRotation();
-    gameObject->LocalTransform.SetRotation({oldRot.x, oldRot.y, oldRot.z + gt.DeltaTime() * 2});
-    
-    gameObject->RefreshWorldMatrix();    
+    gameObject->LocalTransform.SetRotation({oldRot.x, oldRot.y + gt.DeltaTime(), oldRot.z});     
 }
