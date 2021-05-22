@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "GameObject.h"
 
-
 GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, std::string goName, Transform transform) :
 ParentGameObject(nullptr),
 GeometryName(subgeoName),
@@ -48,14 +47,7 @@ void GameObject::AddChild(GameObject* child)
         child->SetParent(this);    
 }
 
-void ExtractPitchYawRollFromXMMatrix(float* flt_p_PitchOut, float* flt_p_YawOut, float* flt_p_RollOut, const DirectX::XMMATRIX* XMMatrix_p_Rotation)
-     {
-         DirectX::XMFLOAT4X4 XMFLOAT4X4_Values;
-         DirectX::XMStoreFloat4x4(&XMFLOAT4X4_Values, DirectX::XMMatrixTranspose(*XMMatrix_p_Rotation));
-         *flt_p_PitchOut = (float)asin(-XMFLOAT4X4_Values._23);
-         *flt_p_YawOut = (float) atan2(XMFLOAT4X4_Values._13, XMFLOAT4X4_Values._33);
-         *flt_p_RollOut = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
-     }
+
 
 void GameObject::SetParent(GameObject* parent)
 {
@@ -65,36 +57,7 @@ void GameObject::SetParent(GameObject* parent)
     if(CheckVectorContains<GameObject>(parent->ChildrenGameOjects, this))
         parent->AddChild(this);
 
-    
-    XMFLOAT4X4 result;
-    XMStoreFloat4x4(&result, XMLoadFloat4x4(&Ritem->World) * XMMatrixInverse(nullptr, XMLoadFloat4x4(&parent->Ritem->World)));
-    XMVECTOR newScale, newRot_quat, newTrans;
-    XMMatrixDecompose(&newScale, &newRot_quat, &newTrans, XMLoadFloat4x4(&result));
-
-
-    
-
-    XMFLOAT3 pos;
-    XMStoreFloat3(&pos, newTrans);
-    LocalTransform.SetPosition(pos);
-
-    float x;
-    float y;
-    float z;
-    ExtractPitchYawRollFromXMMatrix(&x, &y, &z, &XMLoadFloat4x4(&result));
-    LocalTransform.SetRotation({x,y,z});
-
-
-    XMFLOAT3 scale;
-    XMStoreFloat3(&scale, newScale);
-    LocalTransform.SetScale(scale); //TODO: bug if parent has non uniform scale
-    
-
-    
-    
-    
-    
-    RefreshWorldMatrix();
+    RecalcTransformRelativeToParent();    
 }
 
 
@@ -116,22 +79,6 @@ XMVECTOR GameObject::GetWorldPosition()
     return trans;
 }
 
-// XMVECTOR GameObject::GetWorldRotation()
-// {
-//     XMVECTOR scale, rot_quat, trans;
-//     XMMatrixDecompose(&scale, &rot_quat, &trans, XMLoadFloat4x4(&Ritem->World));
-//     return rot_quat;
-//     void ExtractPitchYawRollFromXMMatrix(float* flt_p_PitchOut, float* flt_p_YawOut, float* flt_p_RollOut, const DirectX::XMMATRIX* XMMatrix_p_Rotation)
-//     {
-//         DirectX::XMFLOAT4X4 XMFLOAT4X4_Values;
-//         DirectX::XMStoreFloat4x4(&XMFLOAT4X4_Values, DirectX::XMMatrixTranspose(*XMMatrix_p_Rotation));
-//         *flt_p_PitchOut = (float)asin(-XMFLOAT4X4_Values._23);
-//         *flt_p_YawOut = (float) atan2(XMFLOAT4X4_Values._13, XMFLOAT4X4_Values._33);
-//         *flt_p_RollOut = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
-//     }
-// }
-
-
 
 XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
 {
@@ -148,5 +95,29 @@ XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
     XMFLOAT4X4 result;
     XMStoreFloat4x4(&result,localMatrix * parentMatrix);
     return result;
+}
+
+void GameObject::RecalcTransformRelativeToParent()
+{
+    XMFLOAT4X4 result;
+    XMStoreFloat4x4(&result, XMLoadFloat4x4(&Ritem->World) * XMMatrixInverse(nullptr, XMLoadFloat4x4(&ParentGameObject->Ritem->World)));
+    XMVECTOR newScale, newRot_quat, newTrans;
+    XMMatrixDecompose(&newScale, &newRot_quat, &newTrans, XMLoadFloat4x4(&result));    
+
+    XMFLOAT3 pos;
+    XMStoreFloat3(&pos, newTrans);
+    LocalTransform.SetPosition(pos);
+
+    float x;
+    float y;
+    float z;
+    ExtractPitchYawRollFromXMMatrix(&x, &y, &z, &XMLoadFloat4x4(&result));
+    LocalTransform.SetRotation({x,y,z});
+
+    XMFLOAT3 scale;
+    XMStoreFloat3(&scale, newScale);
+    LocalTransform.SetScale(scale); //TODO: bug if parent has non uniform scale
+
+    RefreshWorldMatrix();
 }
 

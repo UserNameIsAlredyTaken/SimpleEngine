@@ -31,6 +31,15 @@
 
 extern const int gNumFrameResources;
 
+inline void ExtractPitchYawRollFromXMMatrix(float* flt_p_PitchOut, float* flt_p_YawOut, float* flt_p_RollOut, const DirectX::XMMATRIX* XMMatrix_p_Rotation)
+{
+    DirectX::XMFLOAT4X4 XMFLOAT4X4_Values;
+    DirectX::XMStoreFloat4x4(&XMFLOAT4X4_Values, DirectX::XMMatrixTranspose(*XMMatrix_p_Rotation));
+    *flt_p_PitchOut = (float)asin(-XMFLOAT4X4_Values._23);
+    *flt_p_YawOut = (float) atan2(XMFLOAT4X4_Values._13, XMFLOAT4X4_Values._33);
+    *flt_p_RollOut = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
+}
+
 template <class T> inline bool CheckVectorContains(std::vector<T*> vector, T* object)
 {
     return std::find(vector.begin(), vector.end(), object) == vector.end();

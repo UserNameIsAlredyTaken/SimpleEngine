@@ -64,7 +64,8 @@ private:
     GameObject* ParentGameObject;
     std::vector<GameObject*> ChildrenGameOjects;
     std::vector<std::shared_ptr<BaseComponent>> Components;
-    XMFLOAT4X4 GetGlobalWorldMatrix();    
+    XMFLOAT4X4 GetGlobalWorldMatrix();
+    void RecalcTransformRelativeToParent();
 
     inline static int cbIndex = 0;
     
