@@ -20,7 +20,7 @@ KatamariGame::KatamariGame(HINSTANCE hInstance)
 	// the world space origin.  In general, you need to loop over every world space vertex
 	// position and compute the bounding sphere.
 	mSceneBounds.Center = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	mSceneBounds.Radius = sqrtf(10.0f*10.0f + 15.0f*15.0f);
+	mSceneBounds.Radius = sqrtf(20.0f*20.0f + 30.0f*30.0f);
 }
 
 KatamariGame::~KatamariGame()
@@ -774,16 +774,15 @@ void KatamariGame::BuildMaterials()
 	mMaterials["Env"] = std::move(envMat);
 }
 
+XMFLOAT3 GetRandomPosition(float maxOffset)
+{
+	return	{-maxOffset/2 + (std::rand() / (float)RAND_MAX) * maxOffset,
+			1,
+			-maxOffset/2 + (std::rand() / (float)RAND_MAX) * maxOffset};
+}
+
 void KatamariGame::BuildGameObjects()
 {
-	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
-	// AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);		
-	// auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({4.0f, 0.0f, 10.0f}));		
-	// auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
-	// 	{2.0f, 2.0f, 2.0f},
-	// 	{0.0f, 0.0f, 0.0f},
-	// 	{0.5f, 0.5f, 0.5f}));
-	
 	auto mainBall = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
 		{0.0f, 2.0f, 0.0f},
 		{0.0f, 0.0f, 0},
@@ -792,21 +791,39 @@ void KatamariGame::BuildGameObjects()
 	mainBall->AddComponent<RollComponent>();
 	mainBall->AddComponent<ColliderComponent>();
 	mainBall->AddComponent<GrabberComponent>();
-
-	
-	auto ball1 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
-		{4.0f, 1.0f, -4.0f},
-		{0.0f, 0.0f, 0.0f},
-		{1.0f, 1.0f, 1.0f}));	
-	ball1->AddComponent<ColliderComponent>();
-	
-	auto ball2 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
-		{-4.0f, 1.0f, 2.0f},
-		{0.0f, 0.0f, 0.0f},
-		{1.0f, 1.0f, 1.0f}));	
-	ball2->AddComponent<ColliderComponent>();
-
 	lookTarget = mainBall;
+	
+	for(int i = 0; i < 5; ++i)
+	{
+		AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1",
+			Transform(
+			GetRandomPosition(40),
+			{0, 0, 0},
+			{1, 1, 1}))->AddComponent<ColliderComponent>();
+	}
+	for(int i = 0; i < 5; ++i)
+	{
+		AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot",
+			Transform(
+			GetRandomPosition(40),
+			{0, 0, 0},
+			{1, 1, 1}))->AddComponent<ColliderComponent>();
+	}
+	for(int i = 0; i < 5; ++i)
+	{
+		AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere",
+			Transform(
+			GetRandomPosition(40),
+			{0, 0, 0},
+			{1, 1, 1}))->AddComponent<ColliderComponent>();
+	}
+	
+	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid",
+			Transform(
+			{0, 0, 0},
+			{0, 0, 0},
+			{2, 2, 2}));
+	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {

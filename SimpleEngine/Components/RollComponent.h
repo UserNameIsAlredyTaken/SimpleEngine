@@ -7,7 +7,7 @@ class RollComponent : public BaseComponent
 private:
     InputComponent* inputManager;
 
-    float rollSpeed = 4;
+    float rollSpeed = 7;
     
 public:
     RollComponent(GameObject* gameObject);
