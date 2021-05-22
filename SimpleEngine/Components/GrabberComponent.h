@@ -1,14 +1,18 @@
 ﻿#pragma once
 #include "BaseComponent.h"
-#include "ColliderComponent.h"
 
-class GarabberComponent : public BaseComponent
+class ColliderComponent;
+class GrabberComponent : public BaseComponent
 {
 private:
     ColliderComponent* collider;
+
+    void Grabb();
 public:
-    GarabberComponent(GameObject* gameObject);
+    GrabberComponent(GameObject* gameObject);
     void Start() override;
     void Update(const GameTimer& gt) override;    
     
 };
+
+

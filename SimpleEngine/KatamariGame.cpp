@@ -3,6 +3,7 @@
 #include "Components/MoveComponent.h"
 #include "GameObject.h"
 #include "Components/ColliderComponent.h"
+#include "Components/GrabberComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/RollComponent.h"
 
@@ -793,6 +794,7 @@ void KatamariGame::BuildGameObjects()
 		{0.5f, 0.5f, 0.5f}));
 
 	ball->AddComponent<ColliderComponent>();
+	ball->AddComponent<GrabberComponent>();
 	ball1->AddComponent<ColliderComponent>();
 	ball2->AddComponent<ColliderComponent>();
 }

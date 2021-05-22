@@ -10,23 +10,16 @@ ColliderComponent::ColliderComponent(GameObject* gameObject) : BaseComponent(gam
 
 void ColliderComponent::Start()
 {
-    OnCollide.connect(boost::bind(&ColliderComponent::V, this));
-    OnCollide();
 }
 
 void ColliderComponent::UpdateCollisionSystem()
 {
     for(auto& collider : Colliders)
-    {
-        printf("collider");
+    {        
+        collider->OnCollide();
     }
 }
 
 void ColliderComponent::Update(const GameTimer& gt)
 {
-}
-
-void ColliderComponent::V()
-{
-    printf("called");
 }

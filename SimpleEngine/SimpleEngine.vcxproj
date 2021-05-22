@@ -556,7 +556,7 @@
     </ClCompile>
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
-    <ClCompile Include="Components\GarabberComponent.cpp" />
+    <ClCompile Include="Components\GrabberComponent.cpp" />
     <ClCompile Include="Components\InputComponent.cpp" />
     <ClCompile Include="Components\MoveComponent.cpp" />
     <ClCompile Include="Components\RollComponent.cpp" />
@@ -854,7 +854,7 @@
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
-    <ClInclude Include="Components\GarabberComponent.h" />
+    <ClInclude Include="Components\GrabberComponent.h" />
     <ClInclude Include="Components\InputComponent.h" />
     <ClInclude Include="Components\MoveComponent.h" />
     <ClInclude Include="Components\RollComponent.h" />
