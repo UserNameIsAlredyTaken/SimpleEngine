@@ -129,6 +129,8 @@ private:
 
     bool flyCar = false;
 
+    GameObject* lookTarget;
+
 };
 
 

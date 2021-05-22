@@ -128,6 +128,12 @@ void KatamariGame::Update(const GameTimer& gt)
     UpdateMainPassCB(gt);
 	UpdateShadowTransform(gt);
 	UpdateShadowPassCB(gt);
+
+	XMFLOAT3 lookPos = lookTarget->LocalTransform.GetPosition();
+	mCamera.LookAt(
+		{-20.0f, 15.0f, 0.0f, 0.0f},
+		{lookPos.x, lookPos.y, lookPos.z, 0.0f},
+		{0.0f, 1.0f, 0.0f, 0.0f});
 }
 
 void KatamariGame::Draw(const GameTimer& gt)
@@ -771,15 +777,13 @@ void KatamariGame::BuildMaterials()
 void KatamariGame::BuildGameObjects()
 {
 	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "grid");
-	AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);		
-	auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({4.0f, 0.0f, 10.0f}));		
-	auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
-		{2.0f, 2.0f, 2.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.5f, 0.5f, 0.5f}));
-	car->AddChild(teapod);
-	
-	
+	// AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "quad", Transform(), RenderLayer::Debug);		
+	// auto car = AddGameObject(mMaterials["Car"].get(), mGeometries["shapeGeo"].get(), "car_1", Transform({4.0f, 0.0f, 10.0f}));		
+	// auto teapod = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "teapot", Transform(
+	// 	{2.0f, 2.0f, 2.0f},
+	// 	{0.0f, 0.0f, 0.0f},
+	// 	{0.5f, 0.5f, 0.5f}));
+	// car->AddChild(teapod);	
 	// car->AddComponent<MoveComponent>();	
 	// teapod->AddComponent<MoveComponent>();
 	
@@ -787,13 +791,11 @@ void KatamariGame::BuildGameObjects()
 		{0.0f, 2.0f, 0.0f},
 		{0.0f, 0.0f, 0},
 		{2.0f, 2.0f, 2.0f}));
-	teapod->AddComponent<InputComponent>();
-	teapod->AddComponent<RollComponent>();
+	ball->AddComponent<InputComponent>();
+	ball->AddComponent<RollComponent>();
 	ball->AddComponent<ColliderComponent>();
 	ball->AddComponent<GrabberComponent>();
 
-	ball->AddChild(teapod);
-	ball->AddComponent<MoveComponent>();
 	
 	auto ball1 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
 		{4.0f, 1.0f, -4.0f},
@@ -801,11 +803,7 @@ void KatamariGame::BuildGameObjects()
 		{1.0f, 1.0f, 1.0f}));	
 	ball1->AddComponent<ColliderComponent>();
 
-	// auto ball2 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
-	// 	{-4.0f, 1.0f, -4.0f},
-	// 	{0.0f, 0.0f, 0.0f},
-	// 	{1.0f, 1.0f, 1.0f}));	
-	// ball2->AddComponent<ColliderComponent>();
+	lookTarget = ball;
 }
 void KatamariGame::DrawGameObjects(ID3D12GraphicsCommandList* cmdList, std::vector<std::shared_ptr<GameObject>>& ritems)
 {
