@@ -121,3 +121,14 @@ void GameObject::RecalcTransformRelativeToParent()
     RefreshWorldMatrix();
 }
 
+bool GameObject::IsParent(GameObject* go)
+{
+    if(ParentGameObject == nullptr)
+        return false;
+    
+    if(ParentGameObject == go)
+        return true;
+
+    return IsParent(ParentGameObject->ParentGameObject);
+}
+

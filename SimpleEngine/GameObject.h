@@ -58,6 +58,8 @@ public:
         return Name;
     };
     
+    bool IsParent(GameObject* go);
+    
 
 private:
     std::string Name;

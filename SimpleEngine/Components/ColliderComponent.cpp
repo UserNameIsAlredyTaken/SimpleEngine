@@ -24,6 +24,10 @@ void ColliderComponent::UpdateCollisionSystem()
          {
              ColliderComponent* collider1 = Colliders[i];
              ColliderComponent* collider2 = Colliders[j];
+
+             if(collider1->GetGameObject()->IsParent(collider2->GetGameObject()) ||
+                 collider2->GetGameObject()->IsParent(collider1->GetGameObject()))
+                     return;
              
              XMFLOAT4 distanceVector; // distance is replicated to each element
              XMStoreFloat4(&distanceVector, XMVector3Length(collider1->gameObject->GetWorldPosition() - collider2->gameObject->GetWorldPosition()));
