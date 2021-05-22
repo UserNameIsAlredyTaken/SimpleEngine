@@ -68,6 +68,13 @@ void GameObject::RefreshWorldMatrix()
         child->RefreshWorldMatrix();
 }
 
+XMVECTOR GameObject::GetWorldPosition()
+{
+    XMVECTOR scale, rot_quat, trans;
+    XMMatrixDecompose(&scale, &rot_quat, &trans, XMLoadFloat4x4(&Ritem->World));
+    return trans;
+}
+
 XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
 {
     //recursively calculates world matrix from parents chain

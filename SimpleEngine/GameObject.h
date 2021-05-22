@@ -53,6 +53,8 @@ public:
     std::shared_ptr<RenderItem> Ritem;
     std::string GeometryName;
 
+    XMVECTOR GetWorldPosition();
+
 private:
     GameObject* ParentGameObject;
     std::vector<GameObject*> ChildrenGameOjects;
