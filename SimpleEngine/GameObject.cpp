@@ -2,9 +2,10 @@
 #include "GameObject.h"
 
 
-GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform) :
+GameObject::GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, std::string goName, Transform transform) :
 ParentGameObject(nullptr),
 GeometryName(subgeoName),
+Name(goName),
 LocalTransform(transform)
 {
     auto ritem = std::make_shared<RenderItem>();
@@ -44,7 +45,7 @@ void GameObject::AddChild(GameObject* child)
             ChildrenGameOjects.push_back(child);
     
     if(child->ParentGameObject != this) 
-        child->SetParent(this);
+        child->SetParent(this);    
 }
 
 void GameObject::SetParent(GameObject* parent)
@@ -54,6 +55,17 @@ void GameObject::SetParent(GameObject* parent)
 
     if(CheckVectorContains<GameObject>(parent->ChildrenGameOjects, this))
         parent->AddChild(this);
+
+    XMFLOAT3 oldPos = LocalTransform.GetPosition();
+    XMFLOAT3 parentPos = parent->LocalTransform.GetPosition();    
+    LocalTransform.SetPosition({oldPos.x - parentPos.x, oldPos.y - parentPos.y, oldPos.z - parentPos.z});
+
+    XMFLOAT3 oldRot = LocalTransform.GetRotation();
+    XMFLOAT3 parentRot = parent->LocalTransform.GetRotation();
+    XMFLOAT3 n = {oldRot.x - parentRot.x, oldRot.y - parentRot.y, oldRot.z - parentRot.z};
+    LocalTransform.SetRotation({oldRot.x - parentRot.x, oldRot.y - parentRot.y, oldRot.z - parentRot.z});
+    
+    RefreshWorldMatrix();
 }
 
 
@@ -74,6 +86,7 @@ XMVECTOR GameObject::GetWorldPosition()
     XMMatrixDecompose(&scale, &rot_quat, &trans, XMLoadFloat4x4(&Ritem->World));
     return trans;
 }
+
 
 XMFLOAT4X4 GameObject::GetGlobalWorldMatrix()
 {

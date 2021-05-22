@@ -39,7 +39,7 @@ struct RenderItem
 class GameObject
 {
 public:
-    GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform = Transform());
+    GameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, std::string goName, Transform transform = Transform());
     
     void Update(const GameTimer& gt);
     void Start();
@@ -54,8 +54,13 @@ public:
     std::string GeometryName;
 
     XMVECTOR GetWorldPosition();
+    std::string GetName(){
+        return Name;
+    };
+    
 
 private:
+    std::string Name;
     GameObject* ParentGameObject;
     std::vector<GameObject*> ChildrenGameOjects;
     std::vector<std::shared_ptr<BaseComponent>> Components;

@@ -9,6 +9,7 @@
 
 
 const int gNumFrameResources = 3;
+int KatamariGame::GameObjectID = 0;
 
 KatamariGame::KatamariGame(HINSTANCE hInstance)
     : Game(hInstance)
@@ -781,7 +782,10 @@ void KatamariGame::BuildGameObjects()
 	teapod->AddComponent<MoveComponent>();
 	car->AddComponent<MoveComponent>();	
 	
-	auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform({0.0f, 1.0f, 0.0f}));
+	auto ball = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
+		{0.0f, 1.0f, 0.0f},
+		{0.0f, 1.0f, 0.0f},
+		{1.0f, 1.0f, 1.0f}));
 	ball->AddComponent<InputComponent>();
 	ball->AddComponent<RollComponent>();
 	auto ball1 = AddGameObject(mMaterials["Env"].get(), mGeometries["shapeGeo"].get(), "sphere", Transform(
@@ -992,10 +996,10 @@ void KatamariGame::DrawSceneToShadowMap()
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
 
-GameObject* KatamariGame::AddGameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform,
-	RenderLayer layer)
+GameObject* KatamariGame::AddGameObject(Material* mat, MeshGeometry* geo, std::string subgeoName, Transform transform, RenderLayer layer)
 {
-	auto go = std::make_shared<GameObject>(mat, geo, subgeoName, transform);
+	std::string goName = subgeoName;
+	auto go = std::make_shared<GameObject>(mat, geo, subgeoName, goName.append(std::to_string(GameObjectID++)), transform);
 	RenderLayers[(int)layer].push_back(go);
 	AllGameObjects.push_back(std::move(go));
 	return AllGameObjects.back().get();
