@@ -58,7 +58,7 @@ public:
         return Name;
     };
     
-    bool IsParent(GameObject* go);
+    bool IsParentOf(GameObject* go);
     
 
 private:
