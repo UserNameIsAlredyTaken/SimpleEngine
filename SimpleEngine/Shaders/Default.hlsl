@@ -92,6 +92,14 @@ float4 PS(VertexOut pin) : SV_Target
         pin.NormalW, toEyeW, shadowFactor);
 
     float4 litColor = ambient + directLight;
+    
+    //calculate fog
+    float4 fogColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    float fogStart = 1.0f;
+    float fogRange = 30.0f;
+    float distToEye = distance(gEyePosW, pin.PosW);
+    float fogAmount = saturate((distToEye - fogStart) / fogRange);
+    litColor = lerp(litColor, fogColor, fogAmount);
 
     // Common convention to take alpha from diffuse albedo.
     litColor.a = diffuseAlbedo.a;
